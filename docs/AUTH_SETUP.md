@@ -4,7 +4,7 @@
 - Supabase Auth email/password sign-up is implemented in the web application.
 - Hosted Supabase projects have email confirmation enabled by default; verify that **Authentication → Sign In / Providers → Email → Confirm email** remains enabled.
 - Every new account is assigned the least-privilege `viewer` role.
-- The project has no registered users yet. After the project owner signs up and confirms their email, the owner account must be promoted to `admin` once by the project owner through the Supabase SQL editor. Do not make the first public signup an administrator automatically.
+- One application account is now registered and currently has the default `viewer` role. Confirm that this is the intended project-owner account and that its email is verified before promoting it to `admin` through the Supabase SQL editor. Do not make public signups administrators automatically.
 - After the initial administrator is provisioned, the User Access page can assign `viewer`, `researcher`, `data_analyst`, and `admin` roles.
 - Role checks are enforced in PostgreSQL RLS. Hiding a navigation item is not the security boundary.
 
