@@ -28,7 +28,6 @@ const PAGES: {name:Page;icon:ReactNode;roles:Role[]}[] = [
  {name:'Data Sources',icon:<FileBarChart2/>,roles:['admin','data_analyst','researcher','viewer']},
  {name:'User Access',icon:<Users/>,roles:['admin']},
 ];
-const authRedirectUrl=()=>new URL(import.meta.env.BASE_URL,window.location.href).toString();
 const fmt=(v:unknown)=>Number(v??0).toLocaleString('en-IN',{maximumFractionDigits:1});
 const dateFmt=(v:string)=>new Date(v+'T00:00:00').toLocaleDateString('en-IN',{month:'short',year:'2-digit'});
 const roleAllowed=(role:Role,page:Page)=>PAGES.some(p=>p.name===page&&p.roles.includes(role));
