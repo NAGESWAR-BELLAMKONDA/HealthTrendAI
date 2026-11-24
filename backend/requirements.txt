@@ -5,6 +5,7 @@ statsmodels>=0.14,<1
 xgboost>=2.1,<4
 prophet>=1.1,<2
 pdfplumber>=0.11,<1
+requests>=2.32,<3
 supabase>=2.10,<3
 python-dotenv>=1.0,<2
 pytest>=8,<9
