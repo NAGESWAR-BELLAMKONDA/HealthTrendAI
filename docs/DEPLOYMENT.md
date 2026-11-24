@@ -3,7 +3,7 @@
 ## Frontend: GitHub Pages through GitHub Actions
 Repository: https://github.com/NAGESWAR-BELLAMKONDA/HealthTrendAI
 
-The deployment workflow is `.github/workflows/deploy-pages.yml`. It builds the Vite frontend and publishes the `dist` artifact using the official Pages deployment actions.
+The deployment workflow is `.github/workflows/deploy-pages.yml`. It builds the Vite frontend and publishes the `dist` artifact using the official Pages deployment actions. The public Supabase project URL and publishable key are supplied as Vite build-time variables; these are browser credentials designed to be public and are protected by database RLS.
 
 One repository-owner action is still required:
 1. Open **Settings → Pages** in the repository.
@@ -15,7 +15,7 @@ One repository-owner action is still required:
 Expected Pages base URL:
 `https://nageswar-bellamkonda.github.io/HealthTrendAI/`
 
-The Pages deployment cannot be enabled by the repository contents workflow; it is a repository setting controlled by the owner.
+The Pages deployment cannot be enabled by the repository contents workflow; it is a repository setting controlled by the owner. A recent build succeeded but deployment returned HTTP 404 with GitHub's explicit message to enable Pages. Verify that Settings → Pages is saved with Source = GitHub Actions, then rerun the deployment workflow.
 
 ## Supabase Auth
 Project API URL: `https://ugitalbazfmeqwuscizq.supabase.co`
@@ -58,4 +58,4 @@ The workflow `.github/workflows/monthly-data-pipeline.yml` runs monthly and supp
 Supabase Realtime pushes committed database changes to signed-in browsers. This makes the application database-synchronous; it does not make external government datasets live. The monthly ETL schedule revalidates and re-ingests the currently registered MMIS reports. It does not automatically ingest every newly published report: a new report must first be added to the validated source registry/parser, especially when the publisher changes the report layout or only publishes chart approximations.
 
 ## CI
-`.github/workflows/ci.yml` checks TypeScript, builds the frontend and runs Python tests on each push/PR. The latest Python test job passed; the frontend job is being corrected after a Node setup cache configuration issue.
+`.github/workflows/ci.yml` checks TypeScript, builds the frontend and runs Python tests on each push/PR. CI runs TypeScript type-checking, a production frontend build and Python tests on each push/PR. Check the latest workflow run in the Actions tab before each release.
