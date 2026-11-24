@@ -1,7 +1,7 @@
 # HealthTrend AI — ETL, mining and modelling
 
 ## Current verified series
-The repository contains 22 India national monthly malaria-positive observations, January 2024–October 2025, from official NCVBDC MMIS summary rows. The values are not chart approximations. See `../docs/DATA_SOURCES.md`.
+The repository contains 31 India national monthly malaria-positive observations across Jan–Sep 2023, Jan–Dec 2024 and Jan–Oct 2025, from official NCVBDC MMIS summary rows. The values are not chart approximations. See `../docs/DATA_SOURCES.md`.
 
 ## Data mining
 `healthtrend.mining` provides descriptive trend statistics, linear slope, month-of-year means and period-over-period movement; robust median/MAD anomaly screening; and K-means clustering on standardized level, lag, rolling mean and calendar-seasonality features.
@@ -16,7 +16,7 @@ Persist analyses to Supabase with `--push-supabase` in a trusted environment wit
 ## Ingestion
 `scripts/ingest_mmis.py` downloads the registered official 2024 and 2025 NCVBDC MMIS PDFs, extracts exact monthly Positive/TPC rows, validates non-negative and unique month values, and saves the processed CSV. Add `--push-supabase` to upsert source metadata, dimensions and fact rows.
 
-The monthly scheduled GitHub Actions workflow re-runs the registered-source ETL and saves mining results. It needs repository Actions secrets `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`. These secrets are never committed or exposed to the frontend.
+The monthly scheduled GitHub Actions workflow re-runs the registered-source ETL and saves mining results. The 2023 source ends at September; the missing Oct–Dec 2023 months are not interpolated. It needs repository Actions secrets `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`. These secrets are never committed or exposed to the frontend.
 
 ## Hospital admissions
 The HMIS M14 parser in `healthtrend.ingestion.load_hmis_ipd_monthly_csv` accepts the exact monthly inpatient indicator and TOTAL category. It requires a combined facility aggregate when that field exists, aggregates sub-district rows only after those filters, preserves provisional source notes, rejects negative counts and never interpolates missing months.
