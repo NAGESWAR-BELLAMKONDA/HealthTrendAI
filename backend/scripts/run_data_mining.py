@@ -21,6 +21,12 @@ def persist(outputs: list[dict], target_name: str) -> None:
             "location_id": None,
             "disease_id": None,
         }
+        client.table("mining_results").delete()\
+            .eq("target_name", target_name)\
+            .eq("analysis_type", item["analysis_type"])\
+            .eq("algorithm", item["algorithm"])\
+            .eq("period_start", item["period_start"])\
+            .eq("period_end", item["period_end"]).execute()\
         client.table("mining_results").insert(payload).execute()
 
 
