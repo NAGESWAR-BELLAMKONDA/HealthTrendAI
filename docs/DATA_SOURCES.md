@@ -1,13 +1,13 @@
 # Dataset validation and provenance
 
-## 1. NCVBDC Monthly Malaria Situation Information System (MMIS) — loaded disease series
+## 1. NCVBDC Monthly Malaria Situation Information System (MMIS) — loaded disease series\n- October 2023 report: Jan–Sep 2023 exact TPC Current Year values (7,584; 6,269; 6,532; 9,714; 13,483; 17,272; 27,677; 30,001; 25,343). Source: https://ncvbdc.mohfw.gov.in/Doc/MMIS/October-2023/MMISReport-Country-October-2023.pdf
 - Publisher: National Centre for Vector Borne Diseases Control (NCVBDC), Directorate General of Health Services, Ministry of Health & Family Welfare, Government of India.
 - Frequency: monthly summary reports; geography: India national total.
 - Measure: malaria Total Positive Cases (TPC) / Positive cases, not hospital admissions.
 - December 2024 report: exact TPC Current Year values for January–December 2024.
 - October 2025 report: exact Positive Current Year values for January–October 2025; this later report refreshes the overlapping 2025 months.
 - Sources: https://ncvbdc.mohfw.gov.in/Doc/MMIS/2024/MMIS-Report-Country-Dec-2024.pdf ; https://ncvbdc.mohfw.gov.in/Doc/MMIS/2025/MMIS-Report-India-Oct-2025.pdf
-- Loaded series: 22 continuous monthly observations, January 2024–October 2025. National, not district-level.
+- Loaded series: 31 continuous monthly observations, January 2023–October 2025. National, not district-level.
 
 ## 2. HMIS — monthly inpatient admissions candidate
 - Publisher: Health Management Information System, Ministry of Health & Family Welfare, Government of India.
