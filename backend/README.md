@@ -1,7 +1,7 @@
 # HealthTrend AI — ETL and modelling
 
 ## Verified disease dataset
-The repository contains 22 national monthly malaria-positive observations: Jan–Dec 2024 from NCVBDC's December 2024 report and Jan–Oct 2025 from NCVBDC's October 2025 report. See `../data/processed/india_malaria_monthly_tpc_2024_2025.csv`.
+The repository contains 31 national monthly malaria-positive observations: Jan–Sep 2023 from NCVBDC's October 2023 report, Jan–Dec 2024 from its December 2024 report and Jan–Oct 2025 from its October 2025 report. See `../data/processed/india_malaria_monthly_tpc_2023_2025.csv`.
 
 ## Ingestion
 - `healthtrend.ingestion` normalizes month starts, rejects negative counts and duplicate months, and extracts TPC/Positive Current Year rows from official NCVBDC MMIS PDFs.
@@ -24,7 +24,7 @@ The script requires the exact M14 indicator, Total category and combined facilit
 If the single long-span file lacks M14 or has gaps, the six fiscal-year Dindigul extracts are alternative files (FY 2016–17 through 2021–22): datasets 11769–11774. Their exact M14 coverage must also be checked before use.
 
 ## Modelling
-`healthtrend.models.compare_six_models` implements Decision Tree, Random Forest, XGBoost, ARIMA, SARIMA and Prophet where installed. All models use a shared chronological holdout and rolling one-step-ahead evaluation. It requires 36 contiguous monthly observations. The loaded national malaria series currently has 22 months, so malaria model scoring is intentionally blocked. The Dindigul HMIS admissions series has not yet been ingested.
+`healthtrend.models.compare_six_models` implements Decision Tree, Random Forest, XGBoost, ARIMA, SARIMA and Prophet where installed. All models use a shared chronological holdout and rolling one-step-ahead evaluation. It requires 36 contiguous monthly observations. The loaded national malaria series currently has 31 months, so malaria model scoring is intentionally blocked. The Dindigul HMIS admissions series has not yet been ingested.
 
 ## Tests
 ```bash
