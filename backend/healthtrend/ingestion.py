@@ -27,48 +27,55 @@ def validate_monthly_observations(frame: pd.DataFrame, date_col: str = "date", v
     return out.reset_index(drop=True)
 
 
-def extract_tpc_from_mmis_text(text: str, year: int, report_month: int) -> pd.DataFrame:
-    """Extract monthly national Total Positive Cases from extracted MMIS report text."""
+def extract_monthly_positive_from_mmis_text(text: str, year: int, report_month: int, row_label: str) -> pd.DataFrame:
+    """Extract the exact monthly positive-case row from an NCVBDC MMIS PDF's text."""
     if not 1 <= report_month <= 12:
         raise ValueError("report_month must be 1..12")
     upper = text.upper()
     start = upper.find("GRAPH 2")
     end = upper.find("GRAPH 3", start + 1)
     if start < 0:
-        raise ValueError("Could not locate GRAPH 2 (TPC) in MMIS report")
+        raise ValueError("Could not locate GRAPH 2 (monthly positive cases) in MMIS report")
     section = text[start:end] if end >= 0 else text[start:]
     row_match = re.search(
-        r"TPC\s+Current\s+Year(.*?)(?:TPC\s+3\s+Year\s+Average|There is an increase|$)",
+        re.escape(row_label) + r"(.*?)(?:Positive (?:Last Year|Avg Last 3 Years)|TPC 3 Year Average|There is an increase|$)",
         section,
         flags=re.IGNORECASE | re.DOTALL,
     )
     if not row_match:
-        raise ValueError("Could not locate the TPC Current Year row")
+        raise ValueError(f"Could not locate row: {row_label}")
     raw_values = re.findall(r"(?<![A-Za-z])\d[\d,]*", row_match.group(1))
     values = [int(v.replace(",", "")) for v in raw_values]
     if len(values) < report_month:
-        raise ValueError(f"Report contains {len(values)} TPC values, expected at least {report_month}")
+        raise ValueError(f"Report contains {len(values)} values for {row_label}, expected at least {report_month}")
     rows = [
         {"date": pd.Timestamp(year=year, month=m, day=1), "cases": values[m - 1],
-         "country": "India", "disease": "Malaria", "indicator": "TPC"}
+         "country": "India", "disease": "Malaria", "indicator": row_label}
         for m in range(1, report_month + 1)
     ]
     return validate_monthly_observations(pd.DataFrame(rows))
 
 
-def extract_tpc_from_mmis_pdf(pdf_path: str | Path, year: int, report_month: int) -> pd.DataFrame:
-    """Extract TPC Current Year from an official NCVBDC MMIS PDF; fail closed."""
+def extract_tpc_from_mmis_text(text: str, year: int, report_month: int) -> pd.DataFrame:
+    """Backward-compatible parser for the TPC Current Year row."""
+    return extract_monthly_positive_from_mmis_text(text, year, report_month, "TPC Current Year")
+
+
+def extract_monthly_positive_from_mmis_pdf(pdf_path: str | Path, year: int, report_month: int, row_label: str) -> pd.DataFrame:
     try:
         import pdfplumber
     except ImportError as exc:
         raise RuntimeError("Install pdfplumber to parse NCVBDC MMIS PDFs") from exc
     with pdfplumber.open(str(pdf_path)) as pdf:
         text = "\n".join(page.extract_text() or "" for page in pdf.pages)
-    return extract_tpc_from_mmis_text(text, year, report_month)
+    return extract_monthly_positive_from_mmis_text(text, year, report_month, row_label)
+
+
+def extract_tpc_from_mmis_pdf(pdf_path: str | Path, year: int, report_month: int) -> pd.DataFrame:
+    return extract_monthly_positive_from_mmis_pdf(pdf_path, year, report_month, "TPC Current Year")
 
 
 def load_mmis_pdf_files(reports: Iterable[tuple[str, int, int]]) -> pd.DataFrame:
-    """Load tuples of (pdf_path, report_year, last_reported_month)."""
     frames = [extract_tpc_from_mmis_pdf(path, year, month) for path, year, month in reports]
     if not frames:
         raise ValueError("No MMIS report files supplied")
@@ -76,7 +83,7 @@ def load_mmis_pdf_files(reports: Iterable[tuple[str, int, int]]) -> pd.DataFrame
 
 
 def load_hmis_monthly_csv(path: str | Path, indicator_pattern: str) -> pd.DataFrame:
-    """Normalize a specifically selected HMIS monthly indicator; never infer its meaning."""
+    """Normalize one explicitly selected HMIS monthly indicator; never infer its meaning."""
     raw = pd.read_csv(path)
     required = {"fiscal_year", "month", "state", "indicator", "value"}
     if not required.issubset(raw.columns):
@@ -88,10 +95,8 @@ def load_hmis_monthly_csv(path: str | Path, indicator_pattern: str) -> pd.DataFr
         month = MONTHS.get(str(row["month"]).strip().lower())
         if not month:
             raise ValueError(f"Unknown HMIS month: {row['month']}")
-        fy = str(row["fiscal_year"])
-        start_year = int(fy[:4])
-        year = start_year if month >= 4 else start_year + 1
-        return pd.Timestamp(year=year, month=month, day=1)
+        start_year = int(str(row["fiscal_year"])[:4])
+        return pd.Timestamp(year=start_year if month >= 4 else start_year + 1, month=month, day=1)
     selected["date"] = selected.apply(month_start, axis=1)
     selected["value"] = pd.to_numeric(selected["value"], errors="coerce")
     selected = selected.dropna(subset=["value"])
