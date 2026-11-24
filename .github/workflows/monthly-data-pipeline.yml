@@ -35,8 +35,15 @@ jobs:
       - name: Compare forecasting models when data is sufficient
         shell: bash
         run: |
-          COUNT=$(python -c "import pandas as pd; print(len(pd.read_csv('../data/processed/india_malaria_monthly_tpc_2023_2025.csv')))")
-          if [ "$COUNT" -ge 36 ]; then
+          ELIGIBLE=$(python - <<'PY'
+          import pandas as pd
+          frame = pd.read_csv('../data/processed/india_malaria_monthly_tpc_2023_2025.csv')
+          dates = pd.to_datetime(frame['date'], errors='coerce').dt.to_period('M').dt.to_timestamp()
+          contiguous = dates.notna().all() and not dates.duplicated().any() and len(pd.date_range(dates.min(), dates.max(), freq='MS')) == len(dates)
+          print('yes' if len(frame) >= 36 and contiguous else 'no')
+          PY
+          )
+          if [ "$ELIGIBLE" = "yes" ]; then
             PYTHONPATH=. python scripts/run_model_comparison.py --csv ../data/processed/india_malaria_monthly_tpc_2023_2025.csv --target-name disease_cases --push-supabase
           else
             echo "Forecast comparison skipped: $COUNT contiguous observations available; at least 36 are required."

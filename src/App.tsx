@@ -40,7 +40,7 @@ export default function App(){
  const [page,setPage]=useState<Page>('Overview'),[loading,setLoading]=useState(false),[error,setError]=useState(''),[lastSync,setLastSync]=useState('');
  const [cases,setCases]=useState<Row[]>([]),[dates,setDates]=useState<Row[]>([]),[sources,setSources]=useState<Row[]>([]),[runs,setRuns]=useState<Row[]>([]),[forecasts,setForecasts]=useState<Row[]>([]),[mining,setMining]=useState<Row[]>([]),[admissions,setAdmissions]=useState<Row[]>([]),[roleRows,setRoleRows]=useState<Row[]>([]);
  const [query,setQuery]=useState(''),[diseaseFilter,setDiseaseFilter]=useState('All diseases');
- const [selectedRole,setSelectedRole]=useState<Role>('viewer'),[roleBusy,setRoleBusy]=useState('');
+ const [roleBusy,setRoleBusy]=useState('');
  const [realtime,setRealtime]=useState('connecting');
 
  const loadRole=useCallback(async (uid:string)=>{
@@ -97,7 +97,7 @@ export default function App(){
  const onAuth=async(e:FormEvent)=>{
   e.preventDefault();setAuthBusy(true);setAuthError('');setAuthMessage('');
   try{
-   const redirectTo = new URL(import.meta.env.BASE_URL, window.location.origin).toString();
+   const redirectTo = authRedirectUrl();
    if(authMode==='signup'){
     const {data,error}=await supabase.auth.signUp({email:email.trim(),password,options:{data:{display_name:displayName.trim()},emailRedirectTo:redirectTo}});
     if(error)throw error;
@@ -114,9 +114,9 @@ export default function App(){
   finally{setAuthBusy(false);}
  };
  const signOut=async()=>{await supabase.auth.signOut();setPage('Overview');setAuthMessage('');setIsRecovery(false);};
- const changeRole=async(uid:string)=>{
+ const changeRole=async(uid:string,nextRole:Role)=>{
   setRoleBusy(uid);
-  const {error}=await supabase.from('app_user_roles').update({role:selectedRole}).eq('user_id',uid);
+  const {error}=await supabase.from('app_user_roles').update({role:nextRole}).eq('user_id',uid);
   if(error)setError(error.message);else await loadUsers();
   setRoleBusy('');
  };
@@ -172,7 +172,7 @@ export default function App(){
  {pageRows==='Forecasting'&&<><PageIntro title="Forecasting workspace" text="Inspect forecasts stored from rolling-origin model evaluation. Predictions are not clinical recommendations."/><Panel><SectionHead kicker="FORECAST OUTPUT" title="Predicted versus actual" subtitle="Only actual persisted forecast records are plotted"/>{forecasts.length?<div className="chart-wrap tall"><ResponsiveContainer width="100%" height="100%"><ReLineChart data={forecasts}><CartesianGrid stroke="#23394b" strokeDasharray="4 6"/><XAxis dataKey="forecast_date" tick={{fill:'#8ca2b4',fontSize:10}}/><YAxis tick={{fill:'#8ca2b4',fontSize:10}}/><Tooltip contentStyle={{background:'#101f30',border:'1px solid #29465a',borderRadius:12}}/><Legend/><Line type="monotone" dataKey="actual_value" name="Actual" stroke="#f2bd70" connectNulls dot={false}/><Line type="monotone" dataKey="predicted_value" name="Predicted" stroke="#4ce0c8" dot={false}/></ReLineChart></ResponsiveContainer></div>:<Empty icon={<Waves/>} title="No forecast points saved" detail="Forecast outputs appear after a model run completes successfully."/>}</Panel></>}
  {pageRows==='Model Comparison'&&<><PageIntro title="Model Comparison" text="Compare models using the same chronological holdout. MAE, RMSE and MAPE are computed from the same test observations."/><ModelTable runs={runs}/></>}
  {pageRows==='Data Sources'&&<><PageIntro title="Data Sources & Provenance" text="Open, public-health sources only. Refresh schedules follow the publisher's actual release cadence; this application does not invent live hospital feeds."/><div className="source-cards">{sources.map(s=><Panel key={s.id}><div className="source-card-head"><div className="source-icon"><Database size={17}/></div><span className={s.is_active?'quality-pill':'status-chip failed'}>{s.is_active?'Active':'Inactive'}</span></div><h3>{s.source_name}</h3><p>{s.publisher}</p><div className="source-meta"><span>Geography</span><b>{s.geography??'Not specified'}</b></div><div className="source-meta"><span>Refresh</span><b>{s.refresh_frequency??'Not specified'}</b></div><div className="source-meta"><span>Last loaded</span><b>{s.last_loaded_at?new Date(s.last_loaded_at).toLocaleString():'Not loaded'}</b></div><a className="source-link" href={s.source_url} target="_blank" rel="noreferrer">Open publisher source <ArrowUpRight size={14}/></a></Panel>)}</div>{!sources.length&&<Empty icon={<Database/>} title="No sources registered" detail="The ETL pipeline registers the exact source URL and report period when data is ingested."/>}</>}
- {pageRows==='User Access'&&<><PageIntro title="User access management" text="Assign least-privilege roles to verified accounts. New users are viewers until an administrator promotes them."/><Panel><SectionHead kicker="IDENTITY & ACCESS" title="Verified application accounts" subtitle="Roles are enforced in PostgreSQL row-level security"/><div className="table-scroll"><table><thead><tr><th>USER</th><th>EMAIL</th><th>CURRENT ROLE</th><th>ASSIGN ROLE</th><th>ACTION</th></tr></thead><tbody>{roleRows.map(r=><tr key={r.user_id}><td>{r.display_name||'—'}</td><td>{r.email}</td><td><span className="quality-pill">{ROLE_LABEL[r.role as Role]}</span></td><td><select value={r.role} onChange={e=>setRoleRows(old=>old.map(x=>x.user_id===r.user_id?{...x,role:e.target.value}:x))}><option value="viewer">Viewer</option><option value="researcher">Researcher</option><option value="data_analyst">Data Analyst</option><option value="admin">Administrator</option></select></td><td><button className="small-action" disabled={roleBusy===r.user_id||r.user_id===user?.id} onClick={()=>void changeRole(r.user_id)}>{roleBusy===r.user_id?'Saving…':'Save role'}</button></td></tr>)}</tbody></table></div><p className="role-warning"><ShieldCheck size={15}/> Role changes are audited through the administrator workflow. Your own account cannot change its own role here.</p></Panel></>}
+ {pageRows==='User Access'&&<><PageIntro title="User access management" text="Assign least-privilege roles to verified accounts. New users are viewers until an administrator promotes them."/><Panel><SectionHead kicker="IDENTITY & ACCESS" title="Verified application accounts" subtitle="Roles are enforced in PostgreSQL row-level security"/><div className="table-scroll"><table><thead><tr><th>USER</th><th>EMAIL</th><th>CURRENT ROLE</th><th>ASSIGN ROLE</th><th>ACTION</th></tr></thead><tbody>{roleRows.map(r=><tr key={r.user_id}><td>{r.display_name||'—'}</td><td>{r.email}</td><td><span className="quality-pill">{ROLE_LABEL[r.role as Role]}</span></td><td><select value={r.role} onChange={e=>setRoleRows(old=>old.map(x=>x.user_id===r.user_id?{...x,role:e.target.value}:x))}><option value="viewer">Viewer</option><option value="researcher">Researcher</option><option value="data_analyst">Data Analyst</option><option value="admin">Administrator</option></select></td><td><button className="small-action" disabled={roleBusy===r.user_id||r.user_id===user?.id} onClick={()=>void changeRole(r.user_id,r.role as Role)}>{roleBusy===r.user_id?'Saving…':'Save role'}</button></td></tr>)}</tbody></table></div><p className="role-warning"><ShieldCheck size={15}/> Role changes are audited through the administrator workflow. Your own account cannot change its own role here.</p></Panel></>}
  <footer className="app-footer">HEALTHTREND AI <span>•</span> AGGREGATE RESEARCH INTELLIGENCE <span>•</span> NOT FOR CLINICAL DECISION-MAKING</footer></main></div>;
 }
 

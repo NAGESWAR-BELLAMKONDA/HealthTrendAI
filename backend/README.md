@@ -9,12 +9,12 @@ The repository contains 31 India national monthly malaria-positive observations 
 Run locally:
 ```bash
 python -m pip install -r requirements-ci.txt
-PYTHONPATH=. python scripts/run_data_mining.py --csv ../data/processed/india_malaria_monthly_tpc_2024_2025.csv
+PYTHONPATH=. python scripts/run_data_mining.py --csv ../data/processed/india_malaria_monthly_tpc_2023_2025.csv
 ```
 Persist analyses to Supabase with `--push-supabase` in a trusted environment with server-side service-role credentials.
 
 ## Ingestion
-`scripts/ingest_mmis.py` downloads the registered official 2024 and 2025 NCVBDC MMIS PDFs, extracts exact monthly Positive/TPC rows, validates non-negative and unique month values, and saves the processed CSV. Add `--push-supabase` to upsert source metadata, dimensions and fact rows.
+`scripts/ingest_mmis.py` downloads the registered official October 2023, December 2024 and October 2025 NCVBDC MMIS PDFs, extracts exact monthly Positive/TPC rows, validates non-negative and unique month values, and saves the processed CSV. Add `--push-supabase` to upsert source metadata, dimensions and fact rows.
 
 The monthly scheduled GitHub Actions workflow re-runs the registered-source ETL and saves mining results. The 2023 source ends at September; the missing Oct–Dec 2023 months are not interpolated. It needs repository Actions secrets `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`. These secrets are never committed or exposed to the frontend.
 

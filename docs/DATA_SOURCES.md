@@ -10,6 +10,7 @@
 - January–September 2023: October 2023 national MMIS PDF, exact TPC Current Year row. October–December 2023 remain missing.\n- January–December 2024: December 2024 national MMIS PDF, exact TPC Current Year row.
 - January–October 2025: October 2025 national MMIS PDF, exact Positive Current Year row.
 - Report URLs:
+  - https://ncvbdc.mohfw.gov.in/Doc/MMIS/October-2023/MMISReport-Country-October-2023.pdf
   - https://ncvbdc.mohfw.gov.in/Doc/MMIS/2024/MMIS-Report-Country-Dec-2024.pdf
   - https://ncvbdc.mohfw.gov.in/Doc/MMIS/2025/MMIS-Report-India-Oct-2025.pdf
 - The September 2026 NCVBDC national report is now listed on the official MMIS page. Its extracted graph descriptions provide approximate chart-read values, not a machine-readable monthly table. These approximations are deliberately NOT inserted into the fact table or model training data.

@@ -40,7 +40,7 @@ Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` in `.env.local` if u
 cd backend
 python -m pip install -r requirements-ci.txt
 PYTHONPATH=. pytest -q
-PYTHONPATH=. python scripts/run_data_mining.py --csv ../data/processed/india_malaria_monthly_tpc_2024_2025.csv
+PYTHONPATH=. python scripts/run_data_mining.py --csv ../data/processed/india_malaria_monthly_tpc_2023_2025.csv
 ```
 
 For Supabase ingestion/mining, install `requirements-pipeline.txt` and set server-side `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` only in a trusted environment.

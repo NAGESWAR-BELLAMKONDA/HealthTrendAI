@@ -9,7 +9,7 @@ The initial target is India national monthly malaria positive cases, based on NC
 - ML predictors: lag 1, 2, 3, 6 and 12; trailing rolling means; calendar seasonality features.
 
 ## Evaluation protocol
-All models use the same final chronological holdout and rolling one-step-ahead forecasts. At each test month, preceding actual observations are assumed available. This is not a fixed-origin multi-month forecast. A minimum of 36 contiguous monthly observations is required before comparing seasonal models. The current series has 22 months, so model scoring is intentionally blocked until additional verified reports are ingested.
+All models use the same final chronological holdout and rolling one-step-ahead forecasts. At each test month, preceding actual observations are assumed available. This is not a fixed-origin multi-month forecast. A minimum of 36 contiguous monthly observations is required before comparing seasonal models. The current series has 31 observations with an October–December 2023 gap, so model scoring is intentionally blocked until additional verified reports are ingested.
 
 MAE, RMSE and MAPE are computed from identical test observations. MAPE excludes zero actual denominators and is null if all actuals are zero. No fabricated scores are displayed. Model runs and forecasts are persisted only after successful real-data training.
 
