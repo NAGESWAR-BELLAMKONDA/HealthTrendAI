@@ -10,6 +10,9 @@ import requests
 from healthtrend.ingestion import extract_monthly_positive_from_mmis_pdf, validate_monthly_observations
 
 REPORTS = [
+    {"year": 2023, "last_month": 9, "report_period": "October 2023",
+     "row_label": "TPC Current Year",
+     "url": "https://ncvbdc.mohfw.gov.in/Doc/MMIS/October-2023/MMISReport-Country-October-2023.pdf"},
     {"year": 2024, "last_month": 12, "report_period": "December 2024",
      "row_label": "TPC Current Year",
      "url": "https://ncvbdc.mohfw.gov.in/Doc/MMIS/2024/MMIS-Report-Country-Dec-2024.pdf"},
@@ -37,7 +40,7 @@ def download_reports(raw_dir: Path) -> pd.DataFrame:
         frame["source_pdf_url"] = report["url"]
         frames.append(frame)
     combined = validate_monthly_observations(pd.concat(frames, ignore_index=True))
-    if len(combined) != 22:
+    if len(combined) != 31:
         raise ValueError(f"Expected 22 non-overlapping monthly observations, received {len(combined)}")
     return combined
 
