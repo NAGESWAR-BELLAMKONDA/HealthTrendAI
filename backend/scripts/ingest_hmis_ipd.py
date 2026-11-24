@@ -74,6 +74,7 @@ def upsert_ipd_to_supabase(frame: pd.DataFrame, source_names: list[str], source_
             "admission_count": float(row["cases"]),
             "measure_unit": "inpatient admissions",
             "is_estimated": False,
+            "source_note": row.get("source_note") or None,
             "source_record_id": f"HMIS-IPD-{state}-{district or 'NATIONAL'}-{dt:%Y-%m}",
         })
     client.table("fact_hospital_admissions").upsert(
