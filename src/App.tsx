@@ -1,4 +1,5 @@
 import {useEffect,useState} from 'react';
+import type React from 'react';
 import {Activity,AlertCircle,ArrowUpRight,BarChart3,BrainCircuit,Database,HeartPulse,RefreshCw,ShieldCheck,Waves} from 'lucide-react';
 import {Area,AreaChart,CartesianGrid,ResponsiveContainer,Tooltip,XAxis,YAxis} from 'recharts';
 import {isSupabaseConfigured,supabase} from './lib/supabase';
