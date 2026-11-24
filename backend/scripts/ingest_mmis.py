@@ -88,10 +88,10 @@ def upsert_supabase(frame: pd.DataFrame) -> None:
             "date_key": int(dt.strftime("%Y%m%d")), "location_id": location["id"],
             "disease_id": disease["id"], "source_id": source_ids[row["source_pdf_url"]],
             "case_count": float(row["cases"]), "measure_unit": "positive malaria cases",
-            "is_estimated": False, "source_record_id": f"TPC-{dt:%Y-%m}" if dt.year == 2024 else f"MALARIA-{dt:%Y-%m}",
+            "is_estimated": False, "source_record_id": f"MALARIA-POSITIVE-{dt:%Y-%m}",
         })
     client.table("fact_disease_cases").upsert(
-        facts, on_conflict="date_key,location_id,disease_id,source_id,source_record_id"
+        facts, on_conflict="date_key,location_id,disease_id,source_id"
     ).execute()
 
 
