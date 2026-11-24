@@ -13,14 +13,23 @@
 - Publisher: Health Management Information System, Ministry of Health & Family Welfare, Government of India.
 - Official portal: https://hmis.mohfw.gov.in/#/
 - A monthly HMIS sub-district dataset for The Dangs district, Gujarat, FY 2014–15, explicitly contains the indicator **“Total number of patients admitted (Inpatients) during the month (sum of items 14.10.1.a and 14.10.1.b)”**: https://dataful.in/datasets/8141/
-- National state/month HMIS medical-services extracts are catalogued for FY 2019–20, 2020–21 and 2021–22: https://dataful.in/datasets/6222/ ; https://dataful.in/datasets/6221/ ; https://dataful.in/datasets/6220/. The 2021–22 extract has 508,009 rows, 9 columns, 38 state/UT values, monthly frequency, and an All India row. These are the intended 36-month national candidate series.
-- **Important validation gate:** the exact M14 inpatient-admissions indicator must be present in all three downloaded files. The script searches for the exact indicator, selects category TOTAL, and stops if absent. No hospital-admission values have been loaded into Supabase yet.
-- Tamil Nadu monthly sub-district HMIS datasets are also catalogued for Dindigul FY 2016–17 to 2019–20, but their published overview describes a subset of modules; do not assume they contain M14 admissions without checking the file: https://dataful.in/datasets/11769/ ; https://dataful.in/datasets/11770/ ; https://dataful.in/datasets/11771/ ; https://dataful.in/datasets/11772/.
+- For a longer Tamil Nadu district series, Dataful catalogues Dindigul monthly HMIS extracts for six consecutive fiscal years:
+  - FY 2016–17: https://dataful.in/datasets/11769/
+  - FY 2017–18: https://dataful.in/datasets/11770/
+  - FY 2018–19: https://dataful.in/datasets/11771/
+  - FY 2019–20: https://dataful.in/datasets/11772/
+  - FY 2020–21: https://dataful.in/datasets/11773/
+  - FY 2021–22: https://dataful.in/datasets/11774/
+- Each dataset is monthly and has district/sub-district/indicator detail. The exact M14 indicator must be present in every downloaded file; this has not yet been confirmed for all six Dindigul extracts. The ingestion parser checks the exact indicator, selects category TOTAL and the combined facility aggregate, then sums sub-district values to district-month.
+- If all six files contain complete M14 monthly observations, the combined series will contain up to 72 monthly Dindigul admissions observations. No admission values have been loaded into Supabase yet.
 
-## 3. Annual IPD data (cross-check only)
+## 3. National HMIS state/month alternatives
+National state/month HMIS medical-service extracts are also catalogued for FY 2019–20, 2020–21 and 2021–22: https://dataful.in/datasets/6222/ ; https://dataful.in/datasets/6221/ ; https://dataful.in/datasets/6220/. The 2021–22 extract has 508,009 rows, 9 columns, 38 state/UT values, monthly frequency and an All India row. The exact M14 admissions indicator must be checked in each CSV before using them as a national series.
+
+## 4. Annual IPD data (cross-check only)
 The HMIS catalogue also has annual IPD statistics for 2007–08 to 2019–20: https://dataful.in/datasets/6166/. This is annual and cannot be silently converted to monthly observations.
 
-## 4. HMIS stock data is not admissions
+## 5. HMIS stock data is not admissions
 A Tamil Nadu district-month stock dataset exists for 2008–09 to 2021–22, but it covers family-planning, maternal-health and immunization stock received/distributed/unusable counts, not patient admissions: https://dataful.in/datasets/17420/. It is not used as a hospital-admissions target.
 
 ## Data quality rules
