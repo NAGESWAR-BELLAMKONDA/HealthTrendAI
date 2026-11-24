@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 import pandas as pd
 from healthtrend.models import compare_six_models
+from healthtrend.ingestion import validate_monthly_observations
 
 
 def persist_results(results, frame: pd.DataFrame, target_name: str, location_id: str | None = None, disease_id: str | None = None) -> None:
@@ -63,7 +64,7 @@ def main() -> None:
     parser.add_argument("--push-supabase", action="store_true")
     args = parser.parse_args()
 
-    frame = pd.read_csv(Path(args.csv))
+    frame = validate_monthly_observations(pd.read_csv(Path(args.csv)))
     results = compare_six_models(frame)
     output = [{"model": r.model_name, "metrics": r.metrics, "predictions": r.predictions} for r in results]
     print(json.dumps(output, indent=2))
