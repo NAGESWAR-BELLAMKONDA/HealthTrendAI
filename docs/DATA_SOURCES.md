@@ -7,7 +7,7 @@
 - Loaded measure: national monthly malaria positive cases (2024 report labels this TPC; 2025 report labels it Positive).
 - Exact observations currently committed: 31 months across January–September 2023, January–December 2024 and January–October 2025.
 - January–September 2023: October 2023 national MMIS PDF, exact TPC Current Year row. October–December 2023 are not available in this report and remain missing.
-- January–December 2024: December 2024 national MMIS PDF, exact TPC Current Year row.
+- January–September 2023: October 2023 national MMIS PDF, exact TPC Current Year row. October–December 2023 remain missing.\n- January–December 2024: December 2024 national MMIS PDF, exact TPC Current Year row.
 - January–October 2025: October 2025 national MMIS PDF, exact Positive Current Year row.
 - Report URLs:
   - https://ncvbdc.mohfw.gov.in/Doc/MMIS/2024/MMIS-Report-Country-Dec-2024.pdf
