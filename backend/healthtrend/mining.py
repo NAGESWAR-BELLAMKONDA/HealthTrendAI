@@ -156,7 +156,10 @@ def persist(results: list[dict], target: str, location_id: str | None, disease_i
             "location_id": location_id,
             "disease_id": disease_id,
         }
-        client.table("mining_results").insert(record).execute()
+        client.table("mining_results").upsert(
+            record,
+            on_conflict="analysis_type,target_name,location_id,disease_id,period_start,period_end,algorithm",
+        ).execute()
 
 
 def main() -> None:
