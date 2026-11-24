@@ -1,4 +1,13 @@
 date,country,disease,indicator,cases,source_report_period,source_pdf_url,source_owner,notes
+2023-01-01,India,Malaria,TPC,7584,October 2023,https://ncvbdc.mohfw.gov.in/Doc/MMIS/October-2023/MMISReport-Country-October-2023.pdf,NCVBDC MoHFW,Monthly total positive cases reported in the October 2023 national summary
+2023-02-01,India,Malaria,TPC,6269,October 2023,https://ncvbdc.mohfw.gov.in/Doc/MMIS/October-2023/MMISReport-Country-October-2023.pdf,NCVBDC MoHFW,Monthly total positive cases reported in the October 2023 national summary
+2023-03-01,India,Malaria,TPC,6532,October 2023,https://ncvbdc.mohfw.gov.in/Doc/MMIS/October-2023/MMISReport-Country-October-2023.pdf,NCVBDC MoHFW,Monthly total positive cases reported in the October 2023 national summary
+2023-04-01,India,Malaria,TPC,9714,October 2023,https://ncvbdc.mohfw.gov.in/Doc/MMIS/October-2023/MMISReport-Country-October-2023.pdf,NCVBDC MoHFW,Monthly total positive cases reported in the October 2023 national summary
+2023-05-01,India,Malaria,TPC,13483,October 2023,https://ncvbdc.mohfw.gov.in/Doc/MMIS/October-2023/MMISReport-Country-October-2023.pdf,NCVBDC MoHFW,Monthly total positive cases reported in the October 2023 national summary
+2023-06-01,India,Malaria,TPC,17272,October 2023,https://ncvbdc.mohfw.gov.in/Doc/MMIS/October-2023/MMISReport-Country-October-2023.pdf,NCVBDC MoHFW,Monthly total positive cases reported in the October 2023 national summary
+2023-07-01,India,Malaria,TPC,27677,October 2023,https://ncvbdc.mohfw.gov.in/Doc/MMIS/October-2023/MMISReport-Country-October-2023.pdf,NCVBDC MoHFW,Monthly total positive cases reported in the October 2023 national summary
+2023-08-01,India,Malaria,TPC,30001,October 2023,https://ncvbdc.mohfw.gov.in/Doc/MMIS/October-2023/MMISReport-Country-October-2023.pdf,NCVBDC MoHFW,Monthly total positive cases reported in the October 2023 national summary
+2023-09-01,India,Malaria,TPC,25343,October 2023,https://ncvbdc.mohfw.gov.in/Doc/MMIS/October-2023/MMISReport-Country-October-2023.pdf,NCVBDC MoHFW,Monthly total positive cases reported in the October 2023 national summary
 2024-01-01,India,Malaria,TPC,9722,December 2024,https://ncvbdc.mohfw.gov.in/Doc/MMIS/2024/MMIS-Report-Country-Dec-2024.pdf,NCVBDC MoHFW,Monthly total positive cases reported in the December 2024 national summary
 2024-02-01,India,Malaria,TPC,7725,December 2024,https://ncvbdc.mohfw.gov.in/Doc/MMIS/2024/MMIS-Report-Country-Dec-2024.pdf,NCVBDC MoHFW,Monthly total positive cases reported in the December 2024 national summary
 2024-03-01,India,Malaria,TPC,9168,December 2024,https://ncvbdc.mohfw.gov.in/Doc/MMIS/2024/MMIS-Report-Country-Dec-2024.pdf,NCVBDC MoHFW,Monthly total positive cases reported in the December 2024 national summary
