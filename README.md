@@ -39,4 +39,4 @@ MMIS ingestion can push to Supabase with `--push-supabase` when server-side `SUP
 - No hospital-admission values or fabricated model metrics are in the database.
 - Aggregate public data only; not a clinical diagnosis system.
 
-See [methodology](docs/METHODOLOGY.md), [data sources](docs/DATA_SOURCES.md), and [backend instructions](backend/README.md).
+See [methodology](docs/METHODOLOGY.md), [data sources](docs/DATA_SOURCES.md), [backend instructions](backend/README.md), and [GitHub Pages deployment](docs/DEPLOYMENT.md).
