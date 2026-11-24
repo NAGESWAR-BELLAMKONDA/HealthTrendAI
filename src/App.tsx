@@ -96,13 +96,14 @@ export default function App(){
  const onAuth=async(e:FormEvent)=>{
   e.preventDefault();setAuthBusy(true);setAuthError('');setAuthMessage('');
   try{
+   const redirectTo = new URL(import.meta.env.BASE_URL, window.location.origin).toString();
    if(authMode==='signup'){
-    const {data,error}=await supabase.auth.signUp({email:email.trim(),password,options:{data:{display_name:displayName.trim()},emailRedirectTo:window.location.origin}});
+    const {data,error}=await supabase.auth.signUp({email:email.trim(),password,options:{data:{display_name:displayName.trim()},emailRedirectTo:redirectTo}});
     if(error)throw error;
     if(data.session){setAuthMessage('Account created. You are signed in.');}
     else setAuthMessage('Verification email sent. Open the message in your inbox, verify your address, then return here to sign in. Check Spam if needed.');
    }else if(authMode==='reset'){
-    const {error}=await supabase.auth.resetPasswordForEmail(email.trim(),{redirectTo:window.location.origin});
+    const {error}=await supabase.auth.resetPasswordForEmail(email.trim(),{redirectTo});
     if(error)throw error;setAuthMessage('Password reset instructions have been sent if this email belongs to an account.');
    }else{
     const {error}=await supabase.auth.signInWithPassword({email:email.trim(),password});
