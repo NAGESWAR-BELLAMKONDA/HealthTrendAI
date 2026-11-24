@@ -1,0 +1,17 @@
+date,country,disease,indicator,cases,source_report_period,source_pdf_url,source_owner,notes
+2024-01-01,India,Malaria,TPC,9722,December 2024,https://www.ncvbdc.mohfw.gov.in/Doc/MMIS/2024/MMIS-Report-Country-Dec-2024.pdf,NCVBDC MoHFW,Monthly total positive cases reported in the December 2024 national summary
+2024-02-01,India,Malaria,TPC,7725,December 2024,https://www.ncvbdc.mohfw.gov.in/Doc/MMIS/2024/MMIS-Report-Country-Dec-2024.pdf,NCVBDC MoHFW,Monthly total positive cases reported in the December 2024 national summary
+2024-03-01,India,Malaria,TPC,9168,December 2024,https://www.ncvbdc.mohfw.gov.in/Doc/MMIS/2024/MMIS-Report-Country-Dec-2024.pdf,NCVBDC MoHFW,Monthly total positive cases reported in the December 2024 national summary
+2024-04-01,India,Malaria,TPC,12059,December 2024,https://www.ncvbdc.mohfw.gov.in/Doc/MMIS/2024/MMIS-Report-Country-Dec-2024.pdf,NCVBDC MoHFW,Monthly total positive cases reported in the December 2024 national summary
+2024-05-01,India,Malaria,TPC,15695,December 2024,https://www.ncvbdc.mohfw.gov.in/Doc/MMIS/2024/MMIS-Report-Country-Dec-2024.pdf,NCVBDC MoHFW,Monthly total positive cases reported in the December 2024 national summary
+2024-06-01,India,Malaria,TPC,23175,December 2024,https://www.ncvbdc.mohfw.gov.in/Doc/MMIS/2024/MMIS-Report-Country-Dec-2024.pdf,NCVBDC MoHFW,Monthly total positive cases reported in the December 2024 national summary
+2024-07-01,India,Malaria,TPC,39102,December 2024,https://www.ncvbdc.mohfw.gov.in/Doc/MMIS/2024/MMIS-Report-Country-Dec-2024.pdf,NCVBDC MoHFW,Monthly total positive cases reported in the December 2024 national summary
+2024-08-01,India,Malaria,TPC,35643,December 2024,https://www.ncvbdc.mohfw.gov.in/Doc/MMIS/2024/MMIS-Report-Country-Dec-2024.pdf,NCVBDC MoHFW,Monthly total positive cases reported in the December 2024 national summary
+2024-09-01,India,Malaria,TPC,33442,December 2024,https://www.ncvbdc.mohfw.gov.in/Doc/MMIS/2024/MMIS-Report-Country-Dec-2024.pdf,NCVBDC MoHFW,Monthly total positive cases reported in the December 2024 national summary
+2024-10-01,India,Malaria,TPC,25486,December 2024,https://www.ncvbdc.mohfw.gov.in/Doc/MMIS/2024/MMIS-Report-Country-Dec-2024.pdf,NCVBDC MoHFW,Monthly total positive cases reported in the December 2024 national summary
+2024-11-01,India,Malaria,TPC,28015,December 2024,https://www.ncvbdc.mohfw.gov.in/Doc/MMIS/2024/MMIS-Report-Country-Dec-2024.pdf,NCVBDC MoHFW,Monthly total positive cases reported in the December 2024 national summary
+2024-12-01,India,Malaria,TPC,18151,December 2024,https://www.ncvbdc.mohfw.gov.in/Doc/MMIS/2024/MMIS-Report-Country-Dec-2024.pdf,NCVBDC MoHFW,Monthly total positive cases reported in the December 2024 national summary
+2025-01-01,India,Malaria,TPC,10695,April 2025,https://ncvbdc.mohfw.gov.in/Doc/MMIS/2025/MMIS%20Report-Country_April-2025.pdf,NCVBDC MoHFW,Current-year month-wise value reported in April 2025 summary
+2025-02-01,India,Malaria,TPC,7875,April 2025,https://ncvbdc.mohfw.gov.in/Doc/MMIS/2025/MMIS%20Report-Country_April-2025.pdf,NCVBDC MoHFW,Current-year month-wise value reported in April 2025 summary
+2025-03-01,India,Malaria,TPC,10827,April 2025,https://ncvbdc.mohfw.gov.in/Doc/MMIS/2025/MMIS%20Report-Country_April-2025.pdf,NCVBDC MoHFW,Current-year month-wise value reported in April 2025 summary
+2025-04-01,India,Malaria,TPC,13624,April 2025,https://ncvbdc.mohfw.gov.in/Doc/MMIS/2025/MMIS%20Report-Country_April-2025.pdf,NCVBDC MoHFW,Current-year month-wise value reported in April 2025 summary
