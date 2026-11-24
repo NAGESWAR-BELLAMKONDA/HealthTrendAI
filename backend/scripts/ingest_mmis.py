@@ -7,17 +7,15 @@ from pathlib import Path
 import pandas as pd
 import requests
 
-from healthtrend.ingestion import extract_tpc_from_mmis_pdf, validate_monthly_observations
+from healthtrend.ingestion import extract_monthly_positive_from_mmis_pdf, validate_monthly_observations
 
 REPORTS = [
-    {
-        "year": 2024, "last_month": 12, "report_period": "December 2024",
-        "url": "https://ncvbdc.mohfw.gov.in/Doc/MMIS/2024/MMIS-Report-Country-Dec-2024.pdf",
-    },
-    {
-        "year": 2025, "last_month": 4, "report_period": "April 2025",
-        "url": "https://ncvbdc.mohfw.gov.in/Doc/MMIS/2025/MMIS%20Report-Country_April-2025.pdf",
-    },
+    {"year": 2024, "last_month": 12, "report_period": "December 2024",
+     "row_label": "TPC Current Year",
+     "url": "https://www.ncvbdc.mohfw.gov.in/Doc/MMIS/2024/MMIS-Report-Country-Dec-2024.pdf"},
+    {"year": 2025, "last_month": 10, "report_period": "October 2025",
+     "row_label": "Positive Current Year",
+     "url": "https://ncvbdc.mohfw.gov.in/Doc/MMIS/2025/MMIS-Report-India-Oct-2025.pdf"},
 ]
 
 
@@ -25,38 +23,36 @@ def download_reports(raw_dir: Path) -> pd.DataFrame:
     raw_dir.mkdir(parents=True, exist_ok=True)
     frames = []
     for report in REPORTS:
-        filename = f"mmis_country_{report['year']}_{report['last_month']:02d}.pdf"
+        filename = f"mmis_india_{report['year']}_{report['last_month']:02d}.pdf"
         path = raw_dir / filename
         response = requests.get(report["url"], timeout=60)
         response.raise_for_status()
         if "pdf" not in response.headers.get("content-type", "").lower() and not response.content.startswith(b"%PDF"):
             raise RuntimeError(f"Source did not return a PDF: {report['url']}")
         path.write_bytes(response.content)
-        frame = extract_tpc_from_mmis_pdf(path, report["year"], report["last_month"])
+        frame = extract_monthly_positive_from_mmis_pdf(
+            path, report["year"], report["last_month"], report["row_label"]
+        )
         frame["source_report_period"] = report["report_period"]
         frame["source_pdf_url"] = report["url"]
         frames.append(frame)
     combined = validate_monthly_observations(pd.concat(frames, ignore_index=True))
-    if len(combined) != sum(x["last_month"] for x in REPORTS):
-        raise ValueError("Unexpected number of observations; check report overlap or parsing")
+    if len(combined) != 22:
+        raise ValueError(f"Expected 22 non-overlapping monthly observations, received {len(combined)}")
     return combined
 
 
 def upsert_supabase(frame: pd.DataFrame) -> None:
     from supabase import create_client
-    url = os.environ["SUPABASE_URL"]
-    key = os.environ["SUPABASE_SERVICE_ROLE_KEY"]
-    client = create_client(url, key)
-
+    client = create_client(os.environ["SUPABASE_URL"], os.environ["SUPABASE_SERVICE_ROLE_KEY"])
     source_ids = {}
     for report in REPORTS:
         record = {
-            "source_name": f"MMIS National Malaria TPC — {report['report_period']}",
+            "source_name": f"MMIS National Malaria Positive — {report['report_period']}",
             "publisher": "NCVBDC, Directorate General of Health Services, MoHFW, Government of India",
             "source_url": report["url"],
-            "dataset_description": f"National month-wise malaria Total Positive Cases (TPC) through {report['report_period']}",
-            "geography": "India (national)",
-            "refresh_frequency": "Monthly report publication",
+            "dataset_description": f"National month-wise malaria positive cases through {report['report_period']}",
+            "geography": "India (national)", "refresh_frequency": "Monthly report publication",
             "last_checked_at": pd.Timestamp.now(tz="UTC").isoformat(),
             "last_loaded_at": pd.Timestamp.now(tz="UTC").isoformat(),
         }
@@ -78,20 +74,18 @@ def upsert_supabase(frame: pd.DataFrame) -> None:
             "date_key": int(dt.strftime("%Y%m%d")), "full_date": dt.strftime("%Y-%m-%d"),
             "year": dt.year, "quarter": (dt.month - 1) // 3 + 1, "month": dt.month,
             "month_name": dt.strftime("%B"), "week_of_year": int(dt.strftime("%V")),
-            "day_of_month": dt.day, "day_of_week": dt.isoweekday(),
-            "is_weekend": dt.isoweekday() >= 6,
+            "day_of_month": dt.day, "day_of_week": dt.isoweekday(), "is_weekend": dt.isoweekday() >= 6,
         })
     client.table("dim_date").upsert(date_rows, on_conflict="date_key").execute()
 
     facts = []
     for row in frame.to_dict(orient="records"):
-        report_url = row["source_pdf_url"]
         dt = pd.Timestamp(row["date"])
         facts.append({
             "date_key": int(dt.strftime("%Y%m%d")), "location_id": location["id"],
-            "disease_id": disease["id"], "source_id": source_ids[report_url],
+            "disease_id": disease["id"], "source_id": source_ids[row["source_pdf_url"]],
             "case_count": float(row["cases"]), "measure_unit": "positive malaria cases",
-            "is_estimated": False, "source_record_id": f"TPC-{dt:%Y-%m}",
+            "is_estimated": False, "source_record_id": f"MALARIA-{dt:%Y-%m}",
         })
     client.table("fact_disease_cases").upsert(
         facts, on_conflict="date_key,location_id,disease_id,source_id,source_record_id"
@@ -100,7 +94,7 @@ def upsert_supabase(frame: pd.DataFrame) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--output", default="../../data/processed/india_malaria_monthly_tpc.csv")
+    parser.add_argument("--output", default="../../data/processed/india_malaria_monthly_positive_2024_2025.csv")
     parser.add_argument("--push-supabase", action="store_true")
     args = parser.parse_args()
     repo_root = Path(__file__).resolve().parents[2]
@@ -112,7 +106,7 @@ def main() -> None:
     print(f"Saved {output}")
     if args.push_supabase:
         upsert_supabase(frame)
-        print("Upserted dataset sources, date dimension and malaria case facts to Supabase")
+        print("Upserted source metadata, dimensions and malaria case facts to Supabase")
 
 
 if __name__ == "__main__":
