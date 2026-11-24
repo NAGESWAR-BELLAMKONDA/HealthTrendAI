@@ -1,33 +1,26 @@
 # HealthTrend AI
 **Comparative Analysis of Machine Learning and Time-Series Models for Disease Trend Mining and Hospital Admission Forecasting**
 
-HealthTrend AI is a public research capstone for warehousing aggregate Indian public-health observations, mining disease trends, and comparing machine-learning and time-series forecasting methods.
+A public research capstone for warehousing aggregate Indian public-health observations, mining disease trends, and comparing forecasting methods.
 
-## Verified data currently loaded
+## Verified disease data currently loaded
 - 22 monthly national malaria-positive observations from January 2024 to October 2025.
-- January–December 2024: NCVBDC December 2024 MMIS country summary (TPC Current Year).
-- January–October 2025: NCVBDC October 2025 MMIS India summary (Positive Current Year).
-- Source URLs and report periods are retained per observation in the processed CSV and Supabase source registry.
-- This series is national malaria surveillance data, not district-level data and not hospital admissions.
+- Jan–Dec 2024: NCVBDC December 2024 MMIS country summary (TPC Current Year).
+- Jan–Oct 2025: NCVBDC October 2025 MMIS India summary (Positive Current Year).
+- Source URLs and report periods are retained in the processed CSV and Supabase.
+- This is national malaria surveillance data, not district-level data or hospital admissions.
 
-## Project modules
-1. Data warehousing and preprocessing.
-2. Disease trend mining: Decision Tree, Random Forest and XGBoost.
-3. Forecasting: ARIMA, SARIMA and Prophet.
-4. Model comparison on a common chronological test period.
+## Hospital admissions data research
+HMIS monthly district/sub-district data contains an explicit inpatient-admissions indicator in at least one published extract: “Total number of patients admitted (Inpatients) during the month (sum of items 14.10.1.a and 14.10.1.b)”. A strict parser is implemented. The raw HMIS extract must still be downloaded and audited before admission observations can be loaded. See [source validation](docs/DATA_SOURCES.md).
 
 ## Stack
-- Frontend: React, TypeScript, Vite, Recharts.
-- Database: Supabase PostgreSQL with RLS and realtime case-table notifications.
-- ETL and modelling: Python, pandas, scikit-learn, statsmodels, XGBoost, Prophet.
-- CI: GitHub Actions.
+React + TypeScript + Vite, Supabase PostgreSQL with RLS/realtime, Python pandas/scikit-learn/statsmodels/XGBoost/Prophet, GitHub Actions.
 
-## Run locally
+## Local setup
 ```bash
 npm install
 npm run dev
 ```
-Copy `.env.example` to `.env.local` if you need to override the public Supabase URL/key.
 
 ## ETL and modelling
 ```bash
@@ -37,12 +30,12 @@ PYTHONPATH=. python scripts/ingest_mmis.py
 PYTHONPATH=. pytest -q
 PYTHONPATH=. python scripts/run_model_comparison.py --csv ../data/processed/india_malaria_monthly_tpc_2024_2025.csv
 ```
-The ingestion script can upsert to Supabase with `--push-supabase` when `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are set in a trusted environment. Never commit service-role keys or expose them in browser code.
+MMIS ingestion can push to Supabase with `--push-supabase` when server-side `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are set. Never commit service-role credentials.
 
-## Research limitations
-- The verified time series currently has 22 contiguous months. Model comparison requires at least 36 months and therefore intentionally refuses to report model scores yet.
-- Public HMIS datasets include monthly medical-service indicators, but an exact indicator with a defensible definition of hospital admissions has not yet been selected and ingested.
-- The application never substitutes illustrative presentation metrics for measured model results.
-- Aggregate public data only. This is not a clinical diagnosis or patient-level decision-support tool.
+## Current model readiness
+- The malaria series has 22 contiguous monthly observations; the model comparison requires at least 36 and intentionally refuses to publish scores yet.
+- The monthly HMIS inpatient-admissions indicator has been identified, but its raw data has not yet been ingested.
+- No hospital-admission values or fabricated model metrics are in the database.
+- Aggregate public data only; not a clinical diagnosis system.
 
-See [data-source validation](docs/DATA_SOURCES.md), [methodology](docs/METHODOLOGY.md), and [backend instructions](backend/README.md).
+See [methodology](docs/METHODOLOGY.md), [data sources](docs/DATA_SOURCES.md), and [backend instructions](backend/README.md).
