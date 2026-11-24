@@ -52,10 +52,10 @@ Open **Settings → Secrets and variables → Actions → New repository secret*
 
 The service-role key bypasses RLS. It is used only by the scheduled GitHub Actions runner, never in Vite, browser code, repository files or public build artifacts. Never paste it into ChatGPT or commit it.
 
-The workflow `.github/workflows/data-pipeline.yml` runs monthly and supports manual dispatch. It downloads the registered official MMIS PDFs, validates the monthly rows, upserts warehouse facts, and stores descriptive mining/anomaly/clustering results. It does not manufacture admissions records.
+The workflow `.github/workflows/monthly-data-pipeline.yml` runs monthly and supports manual dispatch. It downloads the registered official MMIS PDFs, validates the monthly rows, upserts warehouse facts, and stores descriptive mining/anomaly/clustering results. It does not manufacture admissions records.
 
 ## Realtime and source cadence
-Supabase Realtime pushes committed database changes to signed-in browsers. This makes the application database-synchronous; it does not make external government datasets live. The monthly ETL schedule follows source publication cadence. A newly published report must be added to the validated source registry/parser before it can be ingested.
+Supabase Realtime pushes committed database changes to signed-in browsers. This makes the application database-synchronous; it does not make external government datasets live. The monthly ETL schedule revalidates and re-ingests the currently registered MMIS reports. It does not automatically ingest every newly published report: a new report must first be added to the validated source registry/parser, especially when the publisher changes the report layout or only publishes chart approximations.
 
 ## CI
 `.github/workflows/ci.yml` checks TypeScript, builds the frontend and runs Python tests on each push/PR. The latest Python test job passed; the frontend job is being corrected after a Node setup cache configuration issue.
