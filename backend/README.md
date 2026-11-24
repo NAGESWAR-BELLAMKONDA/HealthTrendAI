@@ -7,31 +7,21 @@ The repository contains 22 national monthly malaria-positive observations: Jan�
 - `healthtrend.ingestion` normalizes month starts, rejects negative counts and duplicate months, and extracts TPC/Positive Current Year rows from official NCVBDC MMIS PDFs.
 - `scripts/ingest_mmis.py` downloads the selected official reports and can upsert them into Supabase with server-side credentials.
 - `load_hmis_ipd_monthly_csv` requires the exact HMIS M14 inpatient-admissions indicator and Total category. For district/sub-district exports it also requires the combined facility aggregate before summing sub-districts.
-- A published HMIS monthly extract for The Dangs, Gujarat (FY 2014–15) confirms the exact M14 indicator wording. The Dindigul, Tamil Nadu district series is available in six yearly CSV datasets from FY 2016–17 through FY 2021–22; each contains 12 monthly periods. The M14 indicator must be verified in every downloaded file before the series is accepted.
+- Recommended HMIS candidate: Dindigul, Tamil Nadu, monthly data for 2008–09 through 2021–22 (Dataful dataset 15964). It has 132,120 rows, 13 columns, monthly district detail and 601 indicator values. The exact M14 indicator must be present in the downloaded CSV; the parser fails closed if absent.
+- The Dangs FY 2014–15 dataset independently confirms the exact M14 indicator wording in the HMIS monthly collection.
 
-## Download the six Dindigul monthly HMIS extracts
-Download the CSV versions of:
-- FY 2016–17: https://dataful.in/datasets/11769/
-- FY 2017–18: https://dataful.in/datasets/11770/
-- FY 2018–19: https://dataful.in/datasets/11771/
-- FY 2019–20: https://dataful.in/datasets/11772/
-- FY 2020–21: https://dataful.in/datasets/11773/
-- FY 2021–22: https://dataful.in/datasets/11774/
-
-Then run (replace local paths with your downloaded CSV paths):
+## Download and ingest the HMIS file
+Download the CSV from https://dataful.in/datasets/15964/ and run:
 ```bash
 PYTHONPATH=. python scripts/ingest_hmis_ipd.py \
-  --input path/to/hmis_2016_17.csv --source-name "Dindigul HMIS FY2016-17" --source-url https://dataful.in/datasets/11769/ \
-  --input path/to/hmis_2017_18.csv --source-name "Dindigul HMIS FY2017-18" --source-url https://dataful.in/datasets/11770/ \
-  --input path/to/hmis_2018_19.csv --source-name "Dindigul HMIS FY2018-19" --source-url https://dataful.in/datasets/11771/ \
-  --input path/to/hmis_2019_20.csv --source-name "Dindigul HMIS FY2019-20" --source-url https://dataful.in/datasets/11772/ \
-  --input path/to/hmis_2020_21.csv --source-name "Dindigul HMIS FY2020-21" --source-url https://dataful.in/datasets/11773/ \
-  --input path/to/hmis_2021_22.csv --source-name "Dindigul HMIS FY2021-22" --source-url https://dataful.in/datasets/11774/ \
+  --input path/to/dindigul_hmis_2008_2022.csv \
+  --source-name "HMIS Dindigul Monthly 2008-09 to 2021-22" \
+  --source-url https://dataful.in/datasets/15964/ \
   --state "Tamil Nadu" --district "Dindigul"
 ```
-The script requires the exact M14 indicator, Total category and combined facility aggregate. It will fail rather than infer admissions if a file is missing the indicator or has overlapping totals. It also verifies that monthly dates are unique. A complete six-year series would provide 72 months; the actual number depends on source completeness.
+The script requires the exact M14 indicator, Total category and combined facility aggregate. It preserves source notes (including provisional flags), checks monthly uniqueness, and does not interpolate missing values. If the CSV contains a complete M14 series, it can provide up to 168 monthly observations. Add `--push-supabase` only in a trusted environment with `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` set.
 
-Add `--push-supabase` only in a trusted environment with `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` set. The script records each source separately and upserts the district-month admission facts.
+If the single long-span file lacks M14 or has gaps, the six fiscal-year Dindigul extracts are alternative files (FY 2016–17 through 2021–22): datasets 11769–11774. Their exact M14 coverage must also be checked before use.
 
 ## Modelling
 `healthtrend.models.compare_six_models` implements Decision Tree, Random Forest, XGBoost, ARIMA, SARIMA and Prophet where installed. All models use a shared chronological holdout and rolling one-step-ahead evaluation. It requires 36 contiguous monthly observations. The loaded national malaria series currently has 22 months, so malaria model scoring is intentionally blocked. The Dindigul HMIS admissions series has not yet been ingested.
