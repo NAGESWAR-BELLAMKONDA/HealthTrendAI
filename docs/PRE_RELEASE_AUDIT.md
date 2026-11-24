@@ -13,7 +13,7 @@ Production URL: https://nageswar-bellamkonda.github.io/HealthTrendAI/
 - Authenticated browser grants were reduced to the read/update operations required by the app. Anonymous table grants and anonymous RLS policies are absent. Server-side ETL retains service-role access.
 - Mining results now use a stable unique key and upsert instead of insert, preventing duplicate history rows on repeated pipeline runs.
 - CI checks passed before the final idempotency changes; the latest CI run is validating those changes.
-- GitHub Pages deployment completed successfully for commit 7916ebd3e7aefca60c87e43a356668a6b06b026e (the duplicate-data correction release).
+- GitHub Pages deployment completed successfully for commit 7916ebd3e7aefcaaba51b18631f527d4e21b2d18 (the duplicate-data correction release).
 
 ## Current verified data
 
