@@ -177,7 +177,14 @@ def load_hmis_ipd_monthly_csv(
     )
     if location_col:
         group_cols.append(location_col)
-    grouped = selected.groupby(group_cols, as_index=False)["cases"].sum()
+    if "note" in selected.columns:
+        selected["note"] = selected["note"].fillna("").astype(str).str.strip()
+        grouped = selected.groupby(group_cols, as_index=False).agg(
+            cases=("cases", "sum"),
+            source_note=("note", lambda values: "; ".join(sorted({v for v in values if v}))),
+        )
+    else:
+        grouped = selected.groupby(group_cols, as_index=False)["cases"].sum()
     if grouped["date"].duplicated().any() and location_col is None:
         raise ValueError("Multiple HMIS IPD records per month remain; check aggregation dimensions")
     grouped = grouped.rename(columns={location_col: "district"} if location_col else {})
