@@ -43,7 +43,7 @@ PYTHONPATH=. pytest -q
 PYTHONPATH=. python scripts/run_data_mining.py --csv ../data/processed/india_malaria_monthly_tpc_2023_2025.csv
 ```
 
-For Supabase ingestion/mining, install `requirements-pipeline.txt` and set server-side `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` only in a trusted environment.
+For Supabase ingestion/mining, install `requirements-pipeline.txt` and set server-side `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` only in a trusted environment. The monthly GitHub Actions workflow is `.github/workflows/monthly-data-pipeline.yml`; add both values under **Settings → Secrets and variables → Actions** before manually running it.
 
 ## Research evaluation
 The six-model comparison uses the same chronological holdout and rolling one-step-ahead evaluation. It requires at least 36 contiguous monthly observations. The current malaria series has 31 observations with a three-month gap in 2023, so model scoring is intentionally blocked. No illustrative PPT scores are reused as results.
