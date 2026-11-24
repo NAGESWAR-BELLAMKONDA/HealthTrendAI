@@ -1,9 +1,17 @@
 # Research methodology
 
-Compare Machine Learning and time-series methods for disease trend mining and aggregate hospital-admission forecasting.
+## Research target
+The initial target is India national monthly malaria positive cases, based on NCVBDC MMIS. It is not an admission count. Hospital admissions remains a separate target until a validated monthly admission indicator is obtained.
 
-Models: Decision Tree, Random Forest, XGBoost, ARIMA, SARIMA and Prophet. ML features include lag values, rolling summaries and calendar variables. Time-series diagnostics include stationarity checks, decomposition, ACF and PACF where appropriate.
+## Models in scope
+- Machine learning: Decision Tree, Random Forest, XGBoost.
+- Time-series: ARIMA, SARIMA, Prophet.
+- ML predictors: lag 1, 2, 3, 6 and 12; trailing rolling means; calendar seasonality features.
 
-Evaluation protocol: define target/geography/time grain/horizon; sort chronologically; use one common final chronological test window; fit preprocessing only on training data; calculate MAE, RMSE and MAPE from identical test observations; document zero handling for MAPE and consider WAPE or sMAPE; persist parameters, date ranges, metrics and forecasts; discuss uncertainty and practical usefulness.
+## Evaluation protocol
+All models use the same final chronological holdout and rolling one-step-ahead forecasts. At each test month, preceding actual observations are assumed available. This is not a fixed-origin multi-month forecast. A minimum of 36 contiguous monthly observations is required before comparing seasonal models. The current series has 22 months, so model scoring is intentionally blocked until additional verified reports are ingested.
 
-Integrity: the source presentation explicitly labels its demo metrics as randomly generated illustrative data, not experimental findings. This application does not present them as real results. Use aggregate public data only; this is not a clinical diagnosis or patient-level decision tool.
+MAE, RMSE and MAPE are computed from identical test observations. MAPE excludes zero actual denominators and is null if all actuals are zero. No fabricated scores are displayed. Model runs and forecasts are persisted only after successful real-data training.
+
+## Research integrity and safety
+The original presentation labels its sample metrics as illustrative randomly generated values, not experimental findings. Those values are not reused. Only aggregate public data is used; this is not a clinical decision-support or diagnosis system.
