@@ -20,3 +20,16 @@ def test_short_series_does_not_fake_seasonal_or_cluster_results():
     frame = pd.DataFrame({"date": pd.date_range("2025-01-01", periods=6, freq="MS"), "cases": [2, 3, 5, 4, 6, 7]})
     results = analyze_monthly(frame)
     assert all(r.get("status") == "insufficient_data" for r in results if r["analysis_type"] in {"pattern_clustering", "seasonal_decomposition"})
+
+
+def test_analysis_results_have_stable_idempotency_key_fields():
+    frame = pd.DataFrame({
+        "date": pd.date_range("2024-01-01", periods=12, freq="MS"),
+        "cases": list(range(100, 112)),
+    })
+    results = analyze_monthly(frame)
+    for result in results:
+        assert result["analysis_type"]
+        assert result["algorithm"]
+        assert result["period_start"] == "2024-01-01"
+        assert result["period_end"] == "2024-12-01"
