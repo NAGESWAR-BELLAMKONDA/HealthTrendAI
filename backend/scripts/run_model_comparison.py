@@ -23,6 +23,20 @@ def persist_results(results, frame: pd.DataFrame, target_name: str, location_id:
 
     for result in results:
         family = "machine_learning" if result.model_name in {"Decision Tree", "Random Forest", "XGBoost"} else "time_series"
+        existing = client.table("model_runs").delete()\
+            .eq("target_name", target_name)\
+            .eq("model_name", result.model_name)\
+            .eq("test_start", test_start)\
+            .eq("test_end", test_end)\
+        if location_id:\
+            existing = existing.eq("location_id", location_id)\
+        else:\
+            existing = existing.is_("location_id", "null")\
+        if disease_id:\
+            existing = existing.eq("disease_id", disease_id)\
+        else:\
+            existing = existing.is_("disease_id", "null")\
+        existing.execute()\
         run = client.table("model_runs").insert({
             "target_name": target_name,
             "location_id": location_id,
