@@ -12,7 +12,7 @@ from healthtrend.ingestion import extract_monthly_positive_from_mmis_pdf, valida
 REPORTS = [
     {"year": 2024, "last_month": 12, "report_period": "December 2024",
      "row_label": "TPC Current Year",
-     "url": "https://www.ncvbdc.mohfw.gov.in/Doc/MMIS/2024/MMIS-Report-Country-Dec-2024.pdf"},
+     "url": "https://ncvbdc.mohfw.gov.in/Doc/MMIS/2024/MMIS-Report-Country-Dec-2024.pdf"},
     {"year": 2025, "last_month": 10, "report_period": "October 2025",
      "row_label": "Positive Current Year",
      "url": "https://ncvbdc.mohfw.gov.in/Doc/MMIS/2025/MMIS-Report-India-Oct-2025.pdf"},
