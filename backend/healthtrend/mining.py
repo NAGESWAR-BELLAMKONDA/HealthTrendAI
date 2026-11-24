@@ -138,6 +138,11 @@ def analyze_monthly(frame: pd.DataFrame) -> list[dict]:
     return output
 
 
+
+def mine_monthly_series(frame: pd.DataFrame) -> list[dict]:
+    return analyze_monthly(frame)
+
+
 def persist(results: list[dict], target: str, location_id: str | None, disease_id: str | None) -> None:
     from supabase import create_client
     client = create_client(os.environ["SUPABASE_URL"], os.environ["SUPABASE_SERVICE_ROLE_KEY"])
