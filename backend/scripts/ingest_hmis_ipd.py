@@ -24,6 +24,7 @@ def upsert_ipd_to_supabase(frame: pd.DataFrame, source_names: list[str], source_
             "refresh_frequency": "Monthly",
             "last_checked_at": pd.Timestamp.now(tz="UTC").isoformat(),
             "last_loaded_at": pd.Timestamp.now(tz="UTC").isoformat(),
+            "is_active": True,
         }, on_conflict="source_url").execute().data[0]
         source_ids[source_url] = source["id"]
 
