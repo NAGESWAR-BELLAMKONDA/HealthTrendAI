@@ -12,7 +12,7 @@ from healthtrend.ingestion import extract_tpc_from_mmis_pdf, validate_monthly_ob
 REPORTS = [
     {
         "year": 2024, "last_month": 12, "report_period": "December 2024",
-        "url": "https://www.ncvbdc.mohfw.gov.in/Doc/MMIS/2024/MMIS-Report-Country-Dec-2024.pdf",
+        "url": "https://ncvbdc.mohfw.gov.in/Doc/MMIS/2024/MMIS-Report-Country-Dec-2024.pdf",
     },
     {
         "year": 2025, "last_month": 4, "report_period": "April 2025",
@@ -100,7 +100,7 @@ def upsert_supabase(frame: pd.DataFrame) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--output", default="../data/processed/india_malaria_monthly_tpc.csv")
+    parser.add_argument("--output", default="../../data/processed/india_malaria_monthly_tpc.csv")
     parser.add_argument("--push-supabase", action="store_true")
     args = parser.parse_args()
     repo_root = Path(__file__).resolve().parents[2]
