@@ -19,7 +19,7 @@ def analyze_monthly(frame: pd.DataFrame) -> list[dict]:
         raise ValueError("No valid monthly observations to mine")
     dates = pd.to_datetime(clean["date"])
     y = clean["cases"].astype(float).to_numpy()
-    x = np.arange(len(y), dtype=float)
+    month_index = dates.dt.year.to_numpy() * 12 + dates.dt.month.to_numpy()\n    x = (month_index - month_index[0]).astype(float)\n    expected_months = pd.date_range(dates.iloc[0], dates.iloc[-1], freq='MS')\n    is_contiguous = len(expected_months) == len(dates)
     output: list[dict] = []
 
     if len(y) >= 3:
@@ -132,7 +132,7 @@ def analyze_monthly(frame: pd.DataFrame) -> list[dict]:
             "sample_size": len(y),
             "period_start": dates.iloc[0].date().isoformat(),
             "period_end": dates.iloc[-1].date().isoformat(),
-            "result": {"message": "At least 24 contiguous monthly observations are required for a 12-month seasonal decomposition."},
+            "result": {"message": "At least 24 contiguous monthly observations are required for a 12-month seasonal decomposition; gaps are not interpolated."},
             "status": "insufficient_data",
         })
     return output
