@@ -94,7 +94,7 @@ def upsert_supabase(frame: pd.DataFrame) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--output", default="../../data/processed/india_malaria_monthly_positive_2024_2025.csv")
+    parser.add_argument("--output", default="../../data/processed/india_malaria_monthly_tpc_2024_2025.csv")
     parser.add_argument("--push-supabase", action="store_true")
     args = parser.parse_args()
     repo_root = Path(__file__).resolve().parents[2]
