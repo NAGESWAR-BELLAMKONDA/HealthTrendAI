@@ -21,7 +21,7 @@ A Data Mining capstone application for public-health data warehousing, disease t
 - Delivery: GitHub Actions and GitHub Pages
 
 ## Verified dataset in the repository
-- 22 monthly India-wide malaria-positive observations from NCVBDC MMIS, January 2024–October 2025.
+- 31 exact India-wide malaria-positive observations from NCVBDC MMIS: January–September 2023, January–December 2024 and January–October 2025.
 - The values are extracted from the exact monthly report rows and retain source-report provenance.
 - The September 2026 report is available, but its extracted graph descriptions provide approximate chart-read values rather than a machine-readable exact monthly series. Those estimates are not loaded.
 - Hospital admissions are a separate target. The free HMIS options reviewed either do not contain IPD or are annual/limited-period. The hospital-admissions fact table remains empty until a verified monthly M14 source is supplied.
@@ -46,7 +46,7 @@ PYTHONPATH=. python scripts/run_data_mining.py --csv ../data/processed/india_mal
 For Supabase ingestion/mining, install `requirements-pipeline.txt` and set server-side `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` only in a trusted environment.
 
 ## Research evaluation
-The six-model comparison uses the same chronological holdout and rolling one-step-ahead evaluation. It requires at least 36 contiguous monthly observations. The current malaria series has 22 months, so model scoring is intentionally blocked. No illustrative PPT scores are reused as results.
+The six-model comparison uses the same chronological holdout and rolling one-step-ahead evaluation. It requires at least 36 contiguous monthly observations. The current malaria series has 31 observations with a three-month gap in 2023, so model scoring is intentionally blocked. No illustrative PPT scores are reused as results.
 
 ## Deployment
-See [GitHub Pages and Supabase setup](docs/DEPLOYMENT.md). Initial admin role setup is described there. Aggregate public-health research only; this is not a diagnosis or clinical decision-support system.
+See [GitHub Pages and Supabase setup](docs/DEPLOYMENT.md) and [Auth/SMTP setup](docs/AUTH_SETUP.md). Initial admin role setup is described there. Aggregate public-health research only; this is not a diagnosis or clinical decision-support system.
