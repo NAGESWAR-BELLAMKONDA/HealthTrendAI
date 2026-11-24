@@ -19,7 +19,10 @@ def analyze_monthly(frame: pd.DataFrame) -> list[dict]:
         raise ValueError("No valid monthly observations to mine")
     dates = pd.to_datetime(clean["date"])
     y = clean["cases"].astype(float).to_numpy()
-    month_index = dates.dt.year.to_numpy() * 12 + dates.dt.month.to_numpy()\n    x = (month_index - month_index[0]).astype(float)\n    expected_months = pd.date_range(dates.iloc[0], dates.iloc[-1], freq='MS')\n    is_contiguous = len(expected_months) == len(dates)
+    month_index = dates.dt.year.to_numpy() * 12 + dates.dt.month.to_numpy()
+    x = (month_index - month_index[0]).astype(float)
+    expected_months = pd.date_range(dates.iloc[0], dates.iloc[-1], freq='MS')
+    is_contiguous = len(expected_months) == len(dates)
     output: list[dict] = []
 
     if len(y) >= 3:
@@ -110,7 +113,7 @@ def analyze_monthly(frame: pd.DataFrame) -> list[dict]:
             "status": "insufficient_data",
         })
 
-    if len(y) >= 24:
+    if len(y) >= 24 and is_contiguous:
         from statsmodels.tsa.seasonal import STL
         stl = STL(pd.Series(y, index=dates), period=12, robust=True).fit()
         output.append({
