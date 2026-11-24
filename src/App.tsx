@@ -35,7 +35,7 @@ const roleAllowed=(role:Role,page:Page)=>PAGES.some(p=>p.name===page&&p.roles.in
 export default function App(){
  const [session,setSession]=useState<Session|null>(null),[user,setUser]=useState<User|null>(null),[role,setRole]=useState<Role>('viewer');
  const [authMode,setAuthMode]=useState<'signin'|'signup'|'reset'>('signin'),[email,setEmail]=useState(''),[password,setPassword]=useState(''),[displayName,setDisplayName]=useState('');
- const [authBusy,setAuthBusy]=useState(false),[authMessage,setAuthMessage]=useState(''),[authError,setAuthError]=useState('');
+ const [authBusy,setAuthBusy]=useState(false),[isRecovery,setIsRecovery]=useState(false),[authMessage,setAuthMessage]=useState(''),[authError,setAuthError]=useState('');
  const [page,setPage]=useState<Page>('Overview'),[loading,setLoading]=useState(false),[error,setError]=useState(''),[lastSync,setLastSync]=useState('');
  const [cases,setCases]=useState<Row[]>([]),[dates,setDates]=useState<Row[]>([]),[sources,setSources]=useState<Row[]>([]),[runs,setRuns]=useState<Row[]>([]),[forecasts,setForecasts]=useState<Row[]>([]),[mining,setMining]=useState<Row[]>([]),[admissions,setAdmissions]=useState<Row[]>([]),[roleRows,setRoleRows]=useState<Row[]>([]);
  const [query,setQuery]=useState(''),[diseaseFilter,setDiseaseFilter]=useState('All diseases');
@@ -76,7 +76,7 @@ export default function App(){
  useEffect(()=>{
    let alive=true;
    supabase.auth.getSession().then(({data})=>{if(!alive)return;setSession(data.session);setUser(data.session?.user??null);});
-   const {data:{subscription}}=supabase.auth.onAuthStateChange((_event,next)=>{setSession(next);setUser(next?.user??null);});
+   const {data:{subscription}}=supabase.auth.onAuthStateChange((event,next)=>{setSession(next);setUser(next?.user??null);if(event==='PASSWORD_RECOVERY'){setAuthMode('reset');setIsRecovery(true);setEmail(next?.user?.email??'');setAuthMessage('Choose a new password for your account.');}});
    return()=>{alive=false;subscription.unsubscribe();};
  },[]);
  useEffect(()=>{if(session?.user)void loadRole(session.user.id);},[session?.user?.id,loadRole]);
@@ -103,8 +103,8 @@ export default function App(){
     if(data.session){setAuthMessage('Account created. You are signed in.');}
     else setAuthMessage('Verification email sent. Open the message in your inbox, verify your address, then return here to sign in. Check Spam if needed.');
    }else if(authMode==='reset'){
-    const {error}=await supabase.auth.resetPasswordForEmail(email.trim(),{redirectTo});
-    if(error)throw error;setAuthMessage('Password reset instructions have been sent if this email belongs to an account.');
+    if(isRecovery){const {error}=await supabase.auth.updateUser({password});if(error)throw error;setIsRecovery(false);setAuthMessage('Password updated successfully.');}
+    else{const {error}=await supabase.auth.resetPasswordForEmail(email.trim(),{redirectTo});if(error)throw error;setAuthMessage('Password reset instructions have been sent if this email belongs to an account.');}
    }else{
     const {error}=await supabase.auth.signInWithPassword({email:email.trim(),password});
     if(error)throw error;setAuthMessage('Signed in successfully.');
@@ -112,7 +112,7 @@ export default function App(){
   }catch(err){setAuthError(err instanceof Error?err.message:'Authentication failed.');}
   finally{setAuthBusy(false);}
  };
- const signOut=async()=>{await supabase.auth.signOut();setPage('Overview');setAuthMessage('');};
+ const signOut=async()=>{await supabase.auth.signOut();setPage('Overview');setAuthMessage('');setIsRecovery(false);};
  const changeRole=async(uid:string)=>{
   setRoleBusy(uid);
   const {error}=await supabase.from('app_user_roles').update({role:selectedRole}).eq('user_id',uid);
@@ -141,14 +141,14 @@ export default function App(){
  const pageRows=roleAllowed(role,page)?page:'Overview';
 
  if(!isSupabaseConfigured)return <div className="auth-shell"><div className="auth-card"><Brand/><h1>Connect your research workspace</h1><p>Configure the Supabase URL and publishable key to continue.</p></div></div>;
- if(!session)return <div className="auth-shell"><div className="auth-glow glow-one"/><div className="auth-glow glow-two"/><section className="auth-card"><Brand/><div className="auth-kicker"><Sparkles size={14}/> DATA MINING · HEALTH INTELLIGENCE</div><h1>{authMode==='signup'?'Create your research account':authMode==='reset'?'Reset your password':'Welcome back'}</h1><p className="auth-sub">A secure workspace for disease trend mining, data warehousing and evidence-based forecasting.</p>
+ if(!session||isRecovery)return <div className="auth-shell"><div className="auth-glow glow-one"/><div className="auth-glow glow-two"/><section className="auth-card"><Brand/><div className="auth-kicker"><Sparkles size={14}/> DATA MINING · HEALTH INTELLIGENCE</div><h1>{authMode==='signup'?'Create your research account':authMode==='reset'?'Reset your password':'Welcome back'}</h1><p className="auth-sub">A secure workspace for disease trend mining, data warehousing and evidence-based forecasting.</p>
   <div className="auth-tabs"><button className={authMode==='signin'?'selected':''} onClick={()=>{setAuthMode('signin');setAuthError('');setAuthMessage('');}}>Sign in</button><button className={authMode==='signup'?'selected':''} onClick={()=>{setAuthMode('signup');setAuthError('');setAuthMessage('');}}>Create account</button></div>
   <form onSubmit={onAuth} className="auth-form">
    {authMode==='signup'&&<label>Display name<input value={displayName} onChange={e=>setDisplayName(e.target.value)} placeholder="Your name" required autoComplete="name"/></label>}
    <label>Email address<div className="input-icon"><Mail size={16}/><input type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="name@organization.com" required autoComplete="email"/></div></label>
    {authMode!=='reset'&&<label>Password<div className="input-icon"><LockKeyhole size={16}/><input type="password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="At least 8 characters" minLength={8} required autoComplete={authMode==='signup'?'new-password':'current-password'}/></div></label>}
    {authMode==='signin'&&<button type="button" className="text-action" onClick={()=>{setAuthMode('reset');setAuthError('');setAuthMessage('');}}>Forgot password?</button>}
-   <button className="primary-button" disabled={authBusy}>{authBusy?'Please wait…':authMode==='signup'?'Create secure account':authMode==='reset'?'Send reset link':'Sign in to workspace'}<ArrowUpRight size={16}/></button>
+   <button className="primary-button" disabled={authBusy}>{authBusy?'Please wait…':authMode==='signup'?'Create secure account':authMode==='reset'?(isRecovery?'Update password':'Send reset link'):'Sign in to workspace'}<ArrowUpRight size={16}/></button>
   </form>
   {authError&&<div className="auth-alert error"><AlertTriangle size={16}/>{authError}</div>}
   {authMessage&&<div className="auth-alert success"><CheckCircle2 size={16}/>{authMessage}</div>}
