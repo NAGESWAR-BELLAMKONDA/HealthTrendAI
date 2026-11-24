@@ -33,7 +33,7 @@ def main() -> None:
     frame = validate_monthly_observations(pd.read_csv(Path(args.csv)), "date", "cases")
     outputs = analyze_monthly(frame)
     for item in outputs:
-        print(f"{item['analysis_type']}: {item['status']} (n={item['sample_size']})")
+        print(f"{item['analysis_type']}: {item.get('status', 'completed')} (n={item['sample_size']})")
     if args.push_supabase:
         persist(outputs, args.target_name)
         print(f"Persisted {len(outputs)} mining analyses to Supabase.")
