@@ -7,7 +7,7 @@ from pathlib import Path
 import pandas as pd
 
 from healthtrend.ingestion import validate_monthly_observations
-from healthtrend.mining import mine_monthly_series
+from healthtrend.mining import analyze_monthly
 
 
 def persist(outputs: list[dict], target_name: str) -> None:
@@ -31,7 +31,7 @@ def main() -> None:
     parser.add_argument("--push-supabase", action="store_true")
     args = parser.parse_args()
     frame = validate_monthly_observations(pd.read_csv(Path(args.csv)), "date", "cases")
-    outputs = mine_monthly_series(frame)
+    outputs = analyze_monthly(frame)
     for item in outputs:
         print(f"{item['analysis_type']}: {item['status']} (n={item['sample_size']})")
     if args.push_supabase:
