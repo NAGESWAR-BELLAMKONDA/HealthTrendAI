@@ -50,7 +50,7 @@ def extract_monthly_positive_from_mmis_text(text: str, year: int, report_month: 
         raise ValueError(f"Report contains {len(values)} values for {row_label}, expected at least {report_month}")
     rows = [
         {"date": pd.Timestamp(year=year, month=m, day=1), "cases": values[m - 1],
-         "country": "India", "disease": "Malaria", "indicator": row_label}
+         "country": "India", "disease": "Malaria", "indicator": "TPC" if row_label.upper().startswith("TPC") else "Positive"}
         for m in range(1, report_month + 1)
     ]
     return validate_monthly_observations(pd.DataFrame(rows))
