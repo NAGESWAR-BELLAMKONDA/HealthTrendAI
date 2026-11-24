@@ -11,7 +11,7 @@ A public research capstone for warehousing aggregate Indian public-health observ
 - This is national malaria surveillance data, not district-level data or hospital admissions.
 
 ## Hospital admissions data research
-HMIS monthly district/sub-district data contains the explicit inpatient-admissions indicator “Total number of patients admitted (Inpatients) during the month”. Six consecutive Dindigul, Tamil Nadu fiscal-year extracts (2016–17 to 2021–22) are catalogued as a candidate 72-month series. The exact indicator must be confirmed in each CSV before admission records are loaded. See [source validation](docs/DATA_SOURCES.md).
+HMIS has a long-span monthly Dindigul, Tamil Nadu dataset (2008–09 to 2021–22) that is a candidate for inpatient-admissions forecasting. A separate HMIS extract confirms the exact M14 inpatient-admissions indicator wording. The long-span CSV still needs an indicator audit before its records can be loaded. See [source validation](docs/DATA_SOURCES.md).
 
 ## Stack
 React + TypeScript + Vite, Supabase PostgreSQL with RLS/realtime, Python pandas/scikit-learn/statsmodels/XGBoost/Prophet, GitHub Actions.
@@ -27,8 +27,8 @@ npm run dev
 cd backend
 python -m pip install -r requirements.txt
 PYTHONPATH=. python scripts/ingest_mmis.py
-# Download the six Dindigul FY2016-17 to FY2021-22 CSVs; see backend/README.md for the full command
-# and the exact indicator/category validation.
+# Download the Dindigul monthly HMIS CSV from https://dataful.in/datasets/15964/
+# See backend/README.md for the exact command and indicator/category validation.
 PYTHONPATH=. pytest -q
 PYTHONPATH=. python scripts/run_model_comparison.py --csv ../data/processed/hmis_ipd_monthly.csv --target-name hospital_admissions --push-supabase
 ```
