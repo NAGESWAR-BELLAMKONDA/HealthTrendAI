@@ -1,17 +1,61 @@
-# Deployment
+# Deployment and production configuration
 
-The frontend build is already verified by GitHub Actions. The Pages artifact also builds successfully. The deployment action currently returns HTTP 404 because GitHub Pages has not yet been enabled for this repository.
+## Frontend: GitHub Pages through GitHub Actions
+Repository: https://github.com/NAGESWAR-BELLAMKONDA/HealthTrendAI
 
-## Enable GitHub Pages once
-1. Open the repository: https://github.com/NAGESWAR-BELLAMKONDA/HealthTrendAI
-2. Go to **Settings → Pages**.
-3. Under **Build and deployment**, set **Source** to **GitHub Actions**.
-4. Save.
+The deployment workflow is `.github/workflows/deploy-pages.yml`. It builds the Vite frontend and publishes the `dist` artifact using the official Pages deployment actions.
 
-## Deploy
-1. Open the **Actions** tab.
-2. Select **Deploy HealthTrend AI to GitHub Pages**.
-3. Select **Run workflow** on the main branch.
-4. After the run succeeds, open the github-pages deployment environment URL shown by GitHub.
+One repository-owner action is still required:
+1. Open **Settings → Pages** in the repository.
+2. Under **Build and deployment**, select **GitHub Actions** as the source.
+3. Save.
+4. Open **Actions → Deploy HealthTrend AI to GitHub Pages → Run workflow** and run it on `main`.
+5. Wait for the deployment environment URL to appear.
 
-The workflow is manual until Pages is enabled, avoiding failed deployments on every normal code commit.
+Expected Pages base URL:
+`https://nageswar-bellamkonda.github.io/HealthTrendAI/`
+
+The Pages deployment cannot be enabled by the repository contents workflow; it is a repository setting controlled by the owner.
+
+## Supabase Auth
+Project API URL: `https://ugitalbazfmeqwuscizq.supabase.co`
+
+In Supabase Dashboard:
+1. Open **Authentication → URL Configuration**.
+2. Set Site URL to `https://nageswar-bellamkonda.github.io/HealthTrendAI/`.
+3. Add the exact Pages URL above to the Redirect URLs allow-list.
+4. Open **Authentication → Providers → Email** and enable email confirmations.
+5. For production email delivery, configure a custom SMTP provider under **Authentication → SMTP Settings**. Supabase's built-in email service is rate-limited and is intended for testing.
+6. Test sign-up, inbox verification, sign-in, password reset and sign-out.
+
+The frontend constructs the redirect from Vite's base path so verification returns to the repository subpath. Local development uses the Vite origin.
+
+## Initial administrator
+New sign-ups receive the least-privilege `viewer` role. The first administrator must be assigned deliberately by the owner in the Supabase SQL Editor after that person has registered and verified their email.
+
+Run this query after replacing the email with the intended administrator's exact verified address:
+
+```sql
+update public.app_user_roles r
+set role = 'admin'
+from auth.users u
+where r.user_id = u.id
+  and lower(u.email) = lower('YOUR_VERIFIED_ADMIN_EMAIL');
+```
+
+Confirm exactly one row was updated. Do not make public sign-ups administrators. After the first administrator is assigned, role changes are available in the app's **User Access** page and are enforced by RLS.
+
+## GitHub Actions data-pipeline secrets
+Open **Settings → Secrets and variables → Actions → New repository secret** and add:
+- `SUPABASE_URL` = the Supabase project URL.
+- `SUPABASE_SERVICE_ROLE_KEY` = the server-side service-role key from the intended Supabase project.
+
+The service-role key bypasses RLS. It is used only by the scheduled GitHub Actions runner, never in Vite, browser code, repository files or public build artifacts. Never paste it into ChatGPT or commit it.
+
+The workflow `.github/workflows/data-pipeline.yml` runs monthly and supports manual dispatch. It downloads the registered official MMIS PDFs, validates the monthly rows, upserts warehouse facts, and stores descriptive mining/anomaly/clustering results. It does not manufacture admissions records.
+
+## Realtime and source cadence
+Supabase Realtime pushes committed database changes to signed-in browsers. This makes the application database-synchronous; it does not make external government datasets live. The monthly ETL schedule follows source publication cadence. A newly published report must be added to the validated source registry/parser before it can be ingested.
+
+## CI
+`.github/workflows/ci.yml` checks TypeScript, builds the frontend and runs Python tests on each push/PR. The latest Python test job passed; the frontend job is being corrected after a Node setup cache configuration issue.
