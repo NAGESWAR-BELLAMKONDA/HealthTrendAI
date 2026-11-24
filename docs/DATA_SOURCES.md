@@ -1,24 +1,28 @@
 # Dataset validation and provenance
 
-## 1. NCVBDC Monthly Malaria Situation Information System (MMIS) — initial time series
+## 1. NCVBDC Monthly Malaria Situation Information System (MMIS) — loaded disease series
 - Publisher: National Centre for Vector Borne Diseases Control (NCVBDC), Directorate General of Health Services, Ministry of Health & Family Welfare, Government of India.
-- Frequency: monthly summary reports.
-- Geography: India national total.
-- Observation: monthly malaria Total Positive Cases (TPC) / Positive cases; not hospital admissions.
+- Frequency: monthly summary reports; geography: India national total.
+- Measure: malaria Total Positive Cases (TPC) / Positive cases, not hospital admissions.
 - December 2024 report: exact TPC Current Year values for January–December 2024.
-- October 2025 report: exact Positive Current Year values for January–October 2025. This is the latest report used to refresh 2025 values and supersedes the earlier April 2025 snapshot for overlapping months.
+- October 2025 report: exact Positive Current Year values for January–October 2025; this later report refreshes the overlapping 2025 months.
 - Sources: https://www.ncvbdc.mohfw.gov.in/Doc/MMIS/2024/MMIS-Report-Country-Dec-2024.pdf ; https://ncvbdc.mohfw.gov.in/Doc/MMIS/2025/MMIS-Report-India-Oct-2025.pdf
-- The current committed series has 22 continuous monthly observations from Jan 2024 to Oct 2025. It is national, not district-level.
+- Loaded series: 22 continuous monthly observations, January 2024–October 2025. National, not district-level.
 
-## 2. HMIS — service-delivery and hospital-utilization candidates
-- Publisher: Health Management Information System, Ministry of Health & Family Welfare.
+## 2. HMIS — monthly inpatient admissions candidate
+- Publisher: Health Management Information System, Ministry of Health & Family Welfare, Government of India.
 - Official portal: https://hmis.mohfw.gov.in/#/
-- The public State and Month-wise Medical Services Statistics FY 2021–22 catalogue describes 508,009 rows, 9 columns, 38 states/UTs, monthly reporting, and multiple medical-service indicators. It is only one fiscal year in that extract: https://dataful.in/datasets/6220/
-- A separate HMIS collection describes monthly state/district indicator coverage for 2008–09 to 2021–22: https://dataful.in/collections/482/
-- Candidate HMIS indicators must be inspected by exact name and definition before being mapped to admissions. IPD attendance, inpatient census, deliveries, and actual admissions are not interchangeable. No admission values have been loaded yet.
+- A monthly HMIS sub-district dataset for The Dangs district, Gujarat, FY 2014–15, explicitly contains the indicator **“Total number of patients admitted (Inpatients) during the month (sum of items 14.10.1.a and 14.10.1.b)”**. It is therefore a defensible admissions measure, unlike IPD/OPD percentages or general inpatient attendance: https://dataful.in/datasets/8141/
+- The catalogue also provides monthly state-level HMIS medical-services extracts for FY 2016–17, 2017–18, 2019–20, 2020–21 and 2021–22 (for example https://dataful.in/datasets/6225/ ; https://dataful.in/datasets/6224/ ; https://dataful.in/datasets/6222/ ; https://dataful.in/datasets/6221/ ; https://dataful.in/datasets/6220/). Their monthly/state structure is confirmed, but the exact M14 admissions indicator must be checked in each downloaded file before those observations are accepted.
+- Tamil Nadu also has monthly sub-district HMIS files, e.g. Dindigul FY 2016–17 through 2019–20, with monthly indicator-level detail: https://dataful.in/datasets/11769/ ; https://dataful.in/datasets/11770/ ; https://dataful.in/datasets/11771/ ; https://dataful.in/datasets/11772/. The exact M14 indicator must be confirmed in each file before use.
+- The repository includes a strict HMIS IPD parser that requires the exact admissions indicator and a Total category. For district files it also requires the combined Public and Private / Rural and Urban facility aggregate before summing sub-districts, preventing double-counting.
+- No hospital-admission values have been loaded into Supabase yet. The raw HMIS CSV download and indicator audit are still required.
 
-## 3. IDSP weekly outbreak reports
-The Integrated Disease Surveillance Programme is a potential source for disease outbreak cases by state/district and week. Weekly data should not be silently converted to monthly without a documented aggregation rule. Portal: https://idsp.mohfw.gov.in/
+## 3. Annual IPD data (validation cross-check only)
+The HMIS catalogue also has year/state/district IPD statistics for 2007–08 to 2019–20: https://dataful.in/datasets/6166/. It is annual and cannot be silently converted into monthly observations.
+
+## 4. HMIS stock data is not admissions
+A Tamil Nadu district-month stock dataset exists for 2008–09 to 2021–22, but it covers family-planning, maternal-health and immunization stock received/distributed/unusable counts, not patient admissions: https://dataful.in/datasets/17420/. It is not used as a hospital-admissions target.
 
 ## Data quality rules
-Preserve report URL and report period for every observation; keep missing distinct from zero; reject duplicates/negative counts; keep geography and measure definitions consistent; record ETL runs; do not interpolate missing months for model evaluation.
+Preserve source URL, fiscal year, district/sub-district and indicator definition for every observation; keep missing distinct from zero; reject duplicates/negative counts; select Total rather than summing overlapping age groups; select a combined facility aggregate rather than summing public/private and rural/urban variants; do not interpolate missing months for model evaluation.
