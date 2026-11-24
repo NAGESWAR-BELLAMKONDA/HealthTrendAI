@@ -1,5 +1,7 @@
 name: Deploy HealthTrend AI to GitHub Pages
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 permissions:
   contents: read
@@ -17,7 +19,7 @@ jobs:
         with:
           node-version: 20
       - run: npm install
-      - run: npm run build
+      - run: npm run build -- --base=/HealthTrendAI/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: ./dist
