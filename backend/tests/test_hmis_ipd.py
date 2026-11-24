@@ -37,12 +37,14 @@ def test_load_hmis_subdistrict_ipd_sums_only_combined_facility_total(tmp_path):
         ],
         "category": ["Total", "Total", "Total"],
         "value": [93, 57, 30],
+        "note": ["provisional source report", "provisional source report", "provisional source report"],
     })
     path = tmp_path / "hmis_district.csv"
     frame.to_csv(path, index=False)
     out = load_hmis_ipd_monthly_csv(path, state="Gujarat", district="Dangs")
     assert len(out) == 1
     assert out.iloc[0]["cases"] == 150
+    assert "provisional source report" in out.iloc[0]["source_note"]
 
 
 def test_load_hmis_ipd_requires_exact_indicator(tmp_path):
