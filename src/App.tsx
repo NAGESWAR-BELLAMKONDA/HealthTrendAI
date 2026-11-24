@@ -176,7 +176,7 @@ export default function App(){
 }
 
 function Brand(){return <div className="brand"><div className="brand-mark"><HeartPulse size={21}/></div><div><b>HealthTrend <em>AI</em></b><small>HEALTH INTELLIGENCE</small></div></div>}
-function Metric({icon,label,value,foot,tone}:{icon:ReactNode;label:string;value:string;foot:string;tone:string}){return <div className="metric-card"><div className={'metric-icon '+tone}>{icon}</div><small>{label}</small><strong>{value}</strong><p>{foot}</p></div>}
+function Metric({icon,label,value,foot,tone='teal'}:{icon:ReactNode;label:string;value:string;foot:string;tone?:string}){return <div className="metric-card"><div className={'metric-icon '+tone}>{icon}</div><small>{label}</small><strong>{value}</strong><p>{foot}</p></div>}
 function Panel({children,className=''}:{children:ReactNode;className?:string}){return <section className={'panel '+className}>{children}</section>}
 function SectionHead({kicker,title,subtitle,right}:{kicker:string;title:string;subtitle:string;right?:ReactNode}){return <div className="section-head"><div><small>{kicker}</small><h3>{title}</h3><p>{subtitle}</p></div>{right}</div>}
 function Empty({icon,title,detail}:{icon:ReactNode;title:string;detail:string}){return <div className="empty-state"><div>{icon}</div><b>{title}</b><p>{detail}</p></div>}
