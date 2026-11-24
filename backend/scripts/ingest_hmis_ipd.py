@@ -23,8 +23,6 @@ def upsert_ipd_to_supabase(frame: pd.DataFrame, source_names: list[str], source_
             "geography": ", ".join(sorted(frame["state"].dropna().astype(str).unique())),
             "refresh_frequency": "Monthly",
             "last_checked_at": pd.Timestamp.now(tz="UTC").isoformat(),
-            "last_loaded_at": pd.Timestamp.now(tz="UTC").isoformat(),
-            "is_active": True,
         }, on_conflict="source_url").execute().data[0]
         source_ids[source_url] = source["id"]
 
@@ -81,6 +79,11 @@ def upsert_ipd_to_supabase(frame: pd.DataFrame, source_names: list[str], source_
     client.table("fact_hospital_admissions").upsert(
         facts, on_conflict="date_key,location_id,disease_id,source_id,source_record_id"
     ).execute()
+    for source_id in source_ids.values():
+        client.table("dataset_sources").update({
+            "is_active": True,
+            "last_loaded_at": pd.Timestamp.now(tz="UTC").isoformat(),
+        }).eq("id", source_id).execute()
 
 
 def main() -> None:
