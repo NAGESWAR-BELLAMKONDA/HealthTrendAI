@@ -103,3 +103,82 @@ def load_hmis_monthly_csv(path: str | Path, indicator_pattern: str) -> pd.DataFr
     if (selected["value"] < 0).any():
         raise ValueError("HMIS contains negative counts; inspect source records")
     return selected
+
+
+def load_hmis_ipd_monthly_csv(
+    path: str | Path,
+    state: str = "All India",
+    district: str | None = None,
+    indicator_pattern: str = r"Total number of patients admitted \(Inpatients\) during the month",
+) -> pd.DataFrame:
+    """Extract monthly IPD admissions from an HMIS CSV without mixing categories.
+
+    Supports state-month HMIS exports (9 columns) and district/sub-district
+    HMIS exports (12/14 columns). For district exports, selects the combined
+    public/private and rural/urban facility aggregate when that column exists,
+    and sums sub-district rows to the district-month level.
+    """
+    raw = pd.read_csv(path)
+    required = {"fiscal_year", "month", "state", "indicator", "category", "value"}
+    missing = required - set(raw.columns)
+    if missing:
+        raise ValueError(f"HMIS IPD CSV is missing columns: {sorted(missing)}")
+
+    selected = raw[
+        raw["indicator"].astype(str).str.contains(indicator_pattern, case=False, regex=True, na=False)
+    ].copy()
+    if selected.empty:
+        raise ValueError("The exact monthly inpatient-admission indicator was not found")
+
+    selected = selected[selected["state"].astype(str).str.casefold() == state.casefold()]
+    if selected.empty:
+        raise ValueError(f"No HMIS IPD rows found for state selection: {state}")
+
+    if district is not None:
+        district_col = "district_as_per_lgd" if "district_as_per_lgd" in selected.columns else (
+            "district" if "district" in selected.columns else "district_as_per_source"
+        )
+        if district_col not in selected.columns:
+            raise ValueError("District filter requested but the HMIS file has no district column")
+        selected = selected[selected[district_col].astype(str).str.casefold() == district.casefold()]
+        if selected.empty:
+            raise ValueError(f"No HMIS IPD rows found for district: {district}")
+
+    selected = selected[selected["category"].astype(str).str.strip().str.casefold().isin({"total", "all", "total "})]
+    if selected.empty:
+        raise ValueError("No total-category IPD records found; refusing to sum age subgroups with totals")
+
+    if "facility_category" in selected.columns:
+        combined = selected["facility_category"].astype(str).str.casefold().str.contains(
+            r"public and private facilities.*rural and urban facilities", regex=True, na=False
+        )
+        if combined.any():
+            selected = selected[combined]
+        else:
+            raise ValueError("Combined facility aggregate not found; refusing to double-count facility categories")
+
+    selected["date"] = selected.apply(
+        lambda row: pd.Timestamp(
+            year=int(str(row["fiscal_year"])[:4]) if MONTHS.get(str(row["month"]).strip().lower(), 0) >= 4
+            else int(str(row["fiscal_year"])[:4]) + 1,
+            month=MONTHS.get(str(row["month"]).strip().lower(), 0),
+            day=1,
+        ) if MONTHS.get(str(row["month"]).strip().lower(), 0) else pd.NaT,
+        axis=1,
+    )
+    selected["cases"] = pd.to_numeric(selected["value"], errors="coerce")
+    selected = selected.dropna(subset=["date", "cases"])
+    if (selected["cases"] < 0).any():
+        raise ValueError("HMIS IPD series contains negative admissions")
+
+    group_cols = ["date", "state"]
+    location_col = "district_as_per_lgd" if "district_as_per_lgd" in selected.columns else (
+        "district" if "district" in selected.columns else None
+    )
+    if location_col:
+        group_cols.append(location_col)
+    grouped = selected.groupby(group_cols, as_index=False)["cases"].sum()
+    if grouped["date"].duplicated().any() and location_col is None:
+        raise ValueError("Multiple HMIS IPD records per month remain; check aggregation dimensions")
+    grouped = grouped.rename(columns={location_col: "district"} if location_col else {})
+    return grouped.sort_values("date").reset_index(drop=True)
