@@ -12,12 +12,18 @@ One repository-owner action is still required:
 4. Open **Actions → Deploy HealthTrend AI to GitHub Pages → Run workflow** and run it on `main`.
 5. Wait for the deployment environment URL to appear.
 
-Expected Pages base URL:
+Expected Pages base URL (direct project deployment link):
 `https://nageswar-bellamkonda.github.io/HealthTrendAI/`
+
+This URL is now also listed at the top of the repository README so the project can be opened directly without navigating through the Actions workflow.
 
 The Pages deployment cannot be enabled by the repository contents workflow; it is a repository setting controlled by the owner. A recent build succeeded but deployment returned HTTP 404 with GitHub's explicit message to enable Pages. Verify that Settings → Pages is saved with Source = GitHub Actions, then rerun the deployment workflow.
 
-## Supabase Auth
+## No-login demo access
+
+The implementation has been changed to open directly into the analytics workspace without sign-in or sign-up. The four role views (Admin, Data Analyst, Researcher, Viewer) are available through a demo selector. These are UI demonstration views only; they are not a security boundary. Public aggregate research tables have read-only `anon` access through RLS. ETL/database writes remain restricted to trusted service-role automation. Do not place patient-level or private data in this public workspace.
+
+## Supabase Auth (not used by the no-login demo)
 Project API URL: `https://ugitalbazfmeqwuscizq.supabase.co`
 
 In Supabase Dashboard:
