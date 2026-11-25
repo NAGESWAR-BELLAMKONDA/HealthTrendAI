@@ -1,5 +1,8 @@
 # HealthTrend AI
 
+> **Live implementation link:** [Open HealthTrend AI deployed app](https://nageswar-bellamkonda.github.io/HealthTrendAI/)
+
+
 **Comparative Analysis of Machine Learning and Time-Series Models for Disease Trend Mining and Hospital Admission Forecasting**
 
 A Data Mining capstone application for public-health data warehousing, disease trend discovery, anomaly screening, clustering and model comparison.
@@ -12,11 +15,11 @@ A Data Mining capstone application for public-health data warehousing, disease t
 - ML Laboratory: Decision Tree, Random Forest and XGBoost
 - Forecasting and Model Comparison: ARIMA, SARIMA and Prophet
 - Data Sources and provenance registry
-- Role-based User Access for administrators
+- Demo role selector (Admin, Data Analyst, Researcher, Viewer) with no sign-in/sign-up gate
 
 ## Technology
 - Frontend: React, TypeScript, Vite, Recharts, Lucide
-- Identity/database: Supabase Auth, PostgreSQL, Row Level Security, Realtime
+- Database: Supabase PostgreSQL, Row Level Security, Realtime; public read-only research access
 - Analytics: Python, Pandas, NumPy, scikit-learn, Statsmodels, XGBoost, Prophet
 - Delivery: GitHub Actions and GitHub Pages
 
@@ -49,4 +52,4 @@ For Supabase ingestion/mining, install `requirements-pipeline.txt` and set serve
 The six-model comparison uses the same chronological holdout and rolling one-step-ahead evaluation. It requires at least 36 contiguous monthly observations. The current malaria series has 31 observations with a three-month gap in 2023, so model scoring is intentionally blocked. No illustrative PPT scores are reused as results.
 
 ## Deployment
-See [GitHub Pages and Supabase setup](docs/DEPLOYMENT.md) and [Auth/SMTP setup](docs/AUTH_SETUP.md). Initial admin role setup is described there. Aggregate public-health research only; this is not a diagnosis or clinical decision-support system.
+See [GitHub Pages deployment setup](docs/DEPLOYMENT.md). Demo role switching is a UI-only view selector, not production authentication or security enforcement. Aggregate public-health research only; this is not a diagnosis or clinical decision-support system.
