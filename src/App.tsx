@@ -1,55 +1,43 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { FormEvent, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import {
   Activity, AlertTriangle, ArrowDownRight, ArrowUpRight, BarChart3, BrainCircuit,
-  CheckCircle2, Clock3, Database, Eye,
-  FileBarChart2, Fingerprint, HeartPulse, Layers3, LineChart, LockKeyhole,
-  LogOut, Mail, RefreshCw, Search, ShieldCheck, Sparkles, Users, Waves,
+  Clock3, Database, Eye,
+  FileBarChart2, Fingerprint, HeartPulse, Layers3, LineChart,
+  RefreshCw, Search, ShieldCheck, Sparkles, Waves,
 } from 'lucide-react';
 import {
   Area, AreaChart, CartesianGrid, Legend, Line, LineChart as ReLineChart,
   ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from 'recharts';
-import type { Session, User } from '@supabase/supabase-js';
 import { isSupabaseConfigured, supabase } from './lib/supabase';
 
 type Role = 'admin' | 'data_analyst' | 'researcher' | 'viewer';
-type Page = 'Overview' | 'Disease Explorer' | 'Data Warehouse' | 'Data Mining' | 'ML Laboratory' | 'Forecasting' | 'Model Comparison' | 'Data Sources' | 'User Access';
+type Page = 'Overview' | 'Disease Explorer' | 'Data Warehouse' | 'Data Mining' | 'ML Laboratory' | 'Forecasting' | 'Model Comparison' | 'Data Sources';
 type Row = Record<string, any>;
-const ROLE_LABEL: Record<Role,string> = {admin:'Administrator',data_analyst:'Data Analyst',researcher:'Researcher',viewer:'Viewer'};
+const ROLE_LABEL: Record<Role,string> = {admin:'Administrator (Demo)',data_analyst:'Data Analyst (Demo)',researcher:'Researcher (Demo)',viewer:'Viewer (Demo)'};
 const PAGES: {name:Page;icon:ReactNode;roles:Role[]}[] = [
  {name:'Overview',icon:<BarChart3/>,roles:['admin','data_analyst','researcher','viewer']},
  {name:'Disease Explorer',icon:<Activity/>,roles:['admin','data_analyst','researcher','viewer']},
- {name:'Data Warehouse',icon:<Database/>,roles:['admin','data_analyst']},
- {name:'Data Mining',icon:<Layers3/>,roles:['admin','data_analyst','researcher']},
- {name:'ML Laboratory',icon:<BrainCircuit/>,roles:['admin','data_analyst']},
- {name:'Forecasting',icon:<Waves/>,roles:['admin','data_analyst','researcher']},
- {name:'Model Comparison',icon:<LineChart/>,roles:['admin','data_analyst','researcher']},
+ {name:'Data Warehouse',icon:<Database/>,roles:['admin','data_analyst','researcher','viewer']},
+ {name:'Data Mining',icon:<Layers3/>,roles:['admin','data_analyst','researcher','viewer']},
+ {name:'ML Laboratory',icon:<BrainCircuit/>,roles:['admin','data_analyst','researcher','viewer']},
+ {name:'Forecasting',icon:<Waves/>,roles:['admin','data_analyst','researcher','viewer']},
+ {name:'Model Comparison',icon:<LineChart/>,roles:['admin','data_analyst','researcher','viewer']},
  {name:'Data Sources',icon:<FileBarChart2/>,roles:['admin','data_analyst','researcher','viewer']},
- {name:'User Access',icon:<Users/>,roles:['admin']},
 ];
 const fmt=(v:unknown)=>Number(v??0).toLocaleString('en-IN',{maximumFractionDigits:1});
 const dateFmt=(v:string)=>new Date(v+'T00:00:00').toLocaleDateString('en-IN',{month:'short',year:'2-digit'});
 const roleAllowed=(role:Role,page:Page)=>PAGES.some(p=>p.name===page&&p.roles.includes(role));
 
 export default function App(){
- const [session,setSession]=useState<Session|null>(null),[user,setUser]=useState<User|null>(null),[role,setRole]=useState<Role>('viewer');
- const [authMode,setAuthMode]=useState<'signin'|'signup'|'reset'>('signin'),[email,setEmail]=useState(''),[password,setPassword]=useState(''),[displayName,setDisplayName]=useState('');
- const [authBusy,setAuthBusy]=useState(false),[isRecovery,setIsRecovery]=useState(false),[authMessage,setAuthMessage]=useState(''),[authError,setAuthError]=useState('');
+ const [role,setRole]=useState<Role>('admin');
  const [page,setPage]=useState<Page>('Overview'),[loading,setLoading]=useState(false),[error,setError]=useState(''),[lastSync,setLastSync]=useState('');
- const [cases,setCases]=useState<Row[]>([]),[dates,setDates]=useState<Row[]>([]),[sources,setSources]=useState<Row[]>([]),[runs,setRuns]=useState<Row[]>([]),[forecasts,setForecasts]=useState<Row[]>([]),[mining,setMining]=useState<Row[]>([]),[admissions,setAdmissions]=useState<Row[]>([]),[roleRows,setRoleRows]=useState<Row[]>([]);
+ const [cases,setCases]=useState<Row[]>([]),[dates,setDates]=useState<Row[]>([]),[sources,setSources]=useState<Row[]>([]),[runs,setRuns]=useState<Row[]>([]),[forecasts,setForecasts]=useState<Row[]>([]),[mining,setMining]=useState<Row[]>([]),[admissions,setAdmissions]=useState<Row[]>([]);
  const [query,setQuery]=useState(''),[diseaseFilter,setDiseaseFilter]=useState('All diseases');
- const [roleBusy,setRoleBusy]=useState('');
  const [realtime,setRealtime]=useState('connecting');
 
- const loadRole=useCallback(async (uid:string)=>{
-   const {data,error}=await supabase.from('app_user_roles').select('role').eq('user_id',uid).maybeSingle();
-   if(error){setRole('viewer');setError('Could not read your application role. Ask the administrator to verify the role table policy.');return;}
-   const next=(data?.role??'viewer') as Role;setRole(next);
-   setPage(p=>roleAllowed(next,p)?p:'Overview');
- },[]);
  const refresh=useCallback(async()=>{
-   if(!session?.user)return;
    setLoading(true);setError('');
    const results=await Promise.all([
     supabase.from('fact_disease_cases').select('id,date_key,location_id,disease_id,source_id,case_count,measure_unit,is_estimated,dim_date!inner(full_date),dim_disease!inner(disease_name),dim_location!inner(location_label)').order('date_key',{ascending:true}).limit(2500),
@@ -71,61 +59,7 @@ export default function App(){
    if(!d.error)setDates(d.data??[]);
    setLastSync(new Date().toLocaleTimeString());
    setLoading(false);
- },[session]);
-
- useEffect(()=>{
-   let alive=true;
-   supabase.auth.getSession().then(({data})=>{if(!alive)return;setSession(data.session);setUser(data.session?.user??null);});
-   const {data:{subscription}}=supabase.auth.onAuthStateChange((event,next)=>{setSession(next);setUser(next?.user??null);if(event==='PASSWORD_RECOVERY'){setAuthMode('reset');setIsRecovery(true);setEmail(next?.user?.email??'');setAuthMessage('Choose a new password for your account.');}});
-   return()=>{alive=false;subscription.unsubscribe();};
  },[]);
- useEffect(()=>{if(session?.user)void loadRole(session.user.id);},[session?.user?.id,loadRole]);
- useEffect(()=>{if(session?.user)void refresh();else{setCases([]);setSources([]);setRuns([]);setForecasts([]);setMining([]);setAdmissions([]);}},[session?.user?.id,refresh]);
- useEffect(()=>{
-   if(!session?.user)return;
-   const channel=supabase.channel('healthtrend-live-warehouse')
-    .on('postgres_changes',{event:'*',schema:'public',table:'fact_disease_cases'},()=>void refresh())
-    .on('postgres_changes',{event:'*',schema:'public',table:'fact_hospital_admissions'},()=>void refresh())
-    .on('postgres_changes',{event:'*',schema:'public',table:'model_runs'},()=>void refresh())
-    .on('postgres_changes',{event:'*',schema:'public',table:'forecast_results'},()=>void refresh())
-    .on('postgres_changes',{event:'*',schema:'public',table:'mining_results'},()=>void refresh())
-    .subscribe(s=>setRealtime(s==='SUBSCRIBED'?'live':s.toLowerCase()));
-   return()=>{void supabase.removeChannel(channel);};
- },[session?.user?.id,refresh]);
-
- const onAuth=async(e:FormEvent)=>{
-  e.preventDefault();setAuthBusy(true);setAuthError('');setAuthMessage('');
-  try{
-   const redirectTo = new URL(import.meta.env.BASE_URL, window.location.href).toString();
-   if(authMode==='signup'){
-    const {data,error}=await supabase.auth.signUp({email:email.trim(),password,options:{data:{display_name:displayName.trim()},emailRedirectTo:redirectTo}});
-    if(error)throw error;
-    if(data.session){setAuthMessage('Account created. You are signed in.');}
-    else setAuthMessage('Verification email sent. Open the message in your inbox, verify your address, then return here to sign in. Check Spam if needed.');
-   }else if(authMode==='reset'){
-    if(isRecovery){const {error}=await supabase.auth.updateUser({password});if(error)throw error;setIsRecovery(false);setAuthMessage('Password updated successfully.');}
-    else{const {error}=await supabase.auth.resetPasswordForEmail(email.trim(),{redirectTo});if(error)throw error;setAuthMessage('Password reset instructions have been sent if this email belongs to an account.');}
-   }else{
-    const {error}=await supabase.auth.signInWithPassword({email:email.trim(),password});
-    if(error)throw error;setAuthMessage('Signed in successfully.');
-   }
-  }catch(err){setAuthError(err instanceof Error?err.message:'Authentication failed.');}
-  finally{setAuthBusy(false);}
- };
- const signOut=async()=>{await supabase.auth.signOut();setPage('Overview');setAuthMessage('');setIsRecovery(false);};
- const changeRole=async(uid:string,nextRole:Role)=>{
-  setRoleBusy(uid);
-  const {error}=await supabase.from('app_user_roles').update({role:nextRole}).eq('user_id',uid);
-  if(error)setError(error.message);else await loadUsers();
-  setRoleBusy('');
- };
- const loadUsers=async()=>{
-  const [p,r]=await Promise.all([supabase.from('profiles').select('user_id,email,display_name,created_at').order('created_at',{ascending:false}),supabase.from('app_user_roles').select('user_id,role')]);
-  if(p.error||r.error){setError(p.error?.message??r.error?.message??'Unable to load users');return;}
-  const roles=new Map((r.data??[]).map((x:any)=>[x.user_id,x.role]));
-  setRoleRows((p.data??[]).map((x:any)=>({...x,role:roles.get(x.user_id)??'viewer'})));
- };
- useEffect(()=>{if(role==='admin'&&page==='User Access')void loadUsers();},[role,page]);
 
  const monthly=useMemo(()=>{
   const grouped=new Map<string,number>();
@@ -140,24 +74,20 @@ export default function App(){
  const admissionsTotal=admissions.reduce((a,r)=>a+Number(r.admission_count),0);
  const pageRows=roleAllowed(role,page)?page:'Overview';
 
- if(!isSupabaseConfigured)return <div className="auth-shell"><div className="auth-card"><Brand/><h1>Connect your research workspace</h1><p>Configure the Supabase URL and publishable key to continue.</p></div></div>;
- if(!session||isRecovery)return <div className="auth-shell"><div className="auth-glow glow-one"/><div className="auth-glow glow-two"/><section className="auth-card"><Brand/><div className="auth-kicker"><Sparkles size={14}/> DATA MINING · HEALTH INTELLIGENCE</div><h1>{authMode==='signup'?'Create your research account':authMode==='reset'?'Reset your password':'Welcome back'}</h1><p className="auth-sub">A secure workspace for disease trend mining, data warehousing and evidence-based forecasting.</p>
-  <div className="auth-tabs"><button className={authMode==='signin'?'selected':''} onClick={()=>{setAuthMode('signin');setAuthError('');setAuthMessage('');}}>Sign in</button><button className={authMode==='signup'?'selected':''} onClick={()=>{setAuthMode('signup');setAuthError('');setAuthMessage('');}}>Create account</button></div>
-  <form onSubmit={onAuth} className="auth-form">
-   {authMode==='signup'&&<label>Display name<input value={displayName} onChange={e=>setDisplayName(e.target.value)} placeholder="Your name" required autoComplete="name"/></label>}
-   <label>Email address<div className="input-icon"><Mail size={16}/><input type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="name@organization.com" required autoComplete="email"/></div></label>
-   {authMode!=='reset'&&<label>Password<div className="input-icon"><LockKeyhole size={16}/><input type="password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="At least 8 characters" minLength={8} required autoComplete={authMode==='signup'?'new-password':'current-password'}/></div></label>}
-   {authMode==='signin'&&<button type="button" className="text-action" onClick={()=>{setAuthMode('reset');setAuthError('');setAuthMessage('');}}>Forgot password?</button>}
-   <button className="primary-button" disabled={authBusy}>{authBusy?'Please wait…':authMode==='signup'?'Create secure account':authMode==='reset'?(isRecovery?'Update password':'Send reset link'):'Sign in to workspace'}<ArrowUpRight size={16}/></button>
-  </form>
-  {authError&&<div className="auth-alert error"><AlertTriangle size={16}/>{authError}</div>}
-  {authMessage&&<div className="auth-alert success"><CheckCircle2 size={16}/>{authMessage}</div>}
-  <div className="auth-foot"><ShieldCheck size={15}/> Email verification · Supabase Auth · Role-based permissions</div>
-  <p className="role-note">New accounts start as Viewer. An administrator assigns Analyst, Researcher or Admin access.</p>
- </section><div className="auth-caption">HEALTHTREND AI <span>•</span> RESEARCH INTELLIGENCE PLATFORM</div></div>;
-
- return <div className="app-shell"><aside className="sidebar"><Brand/><div className="workspace-label">WORKSPACE</div><nav className="nav-list">{PAGES.filter(p=>p.roles.includes(role)).map(p=><button key={p.name} className={pageRows===p.name?'nav-item active':'nav-item'} onClick={()=>setPage(p.name)}>{p.icon}<span>{p.name}</span>{p.name==='Data Mining'&&mining.length>0&&<i className="nav-count">{mining.length}</i>}</button>)}</nav><div className="sidebar-bottom"><div className="security-card"><ShieldCheck size={17}/><div><b>Protected workspace</b><small>Row-level security active</small></div></div><div className="user-card"><div className="user-avatar">{(user?.email??'H').slice(0,1).toUpperCase()}</div><div className="user-meta"><b>{user?.user_metadata?.display_name||user?.email?.split('@')[0]}</b><small>{ROLE_LABEL[role]}</small></div><button title="Sign out" onClick={signOut}><LogOut size={16}/></button></div></div></aside>
- <main className="main-area"><header className="topbar"><div><div className="eyebrow">HEALTHTREND AI <span>/</span> {pageRows.toUpperCase()}</div><h1>{pageRows==='Overview'?'Disease intelligence overview':pageRows}</h1></div><div className="top-actions"><span className={'live-pill '+(realtime==='live'?'':'pending')}><i/>{realtime==='live'?'LIVE SYNC':realtime.toUpperCase()}</span><span className="sync-time"><Clock3 size={14}/>{lastSync?'Synced '+lastSync:'Sync pending'}</span><button className="icon-button" onClick={()=>void refresh()} disabled={loading} title="Refresh data"><RefreshCw size={16} className={loading?'spin':''}/></button><div className="top-avatar">{(user?.email??'H').slice(0,1).toUpperCase()}</div></div></header>
+ useEffect(()=>{void refresh();},[refresh]);
+ useEffect(()=>{
+  const channel=supabase.channel('healthtrend-live-warehouse')
+   .on('postgres_changes',{event:'*',schema:'public',table:'fact_disease_cases'},()=>void refresh())
+   .on('postgres_changes',{event:'*',schema:'public',table:'fact_hospital_admissions'},()=>void refresh())
+   .on('postgres_changes',{event:'*',schema:'public',table:'model_runs'},()=>void refresh())
+   .on('postgres_changes',{event:'*',schema:'public',table:'forecast_results'},()=>void refresh())
+   .on('postgres_changes',{event:'*',schema:'public',table:'mining_results'},()=>void refresh())
+   .subscribe(st=>setRealtime(st==='SUBSCRIBED'?'live':st.toLowerCase()));
+  return()=>{void supabase.removeChannel(channel);};
+ },[refresh]);
+ if(!isSupabaseConfigured)return <div className="auth-shell"><div className="auth-card"><Brand/><h1>Database connection not configured</h1><p>Set the Supabase URL and public publishable key.</p></div></div>;
+ return <div className="app-shell"><aside className="sidebar"><Brand/><div className="workspace-label">WORKSPACE</div><nav className="nav-list">{PAGES.filter(p=>p.roles.includes(role)).map(p=><button key={p.name} className={pageRows===p.name?'nav-item active':'nav-item'} onClick={()=>setPage(p.name)}>{p.icon}<span>{p.name}</span>{p.name==='Data Mining'&&mining.length>0&&<i className="nav-count">{mining.length}</i>}</button>)}</nav><div className="sidebar-bottom"><div className="security-card"><ShieldCheck size={17}/><div><b>Protected workspace</b><small>Row-level security active</small></div></div><div className="role-demo-card"><div className="user-avatar">{role==='admin'?'A':role==='data_analyst'?'D':role==='researcher'?'R':'V'}</div><div className="user-meta"><b>Demo role selector</b><small>Role views · no authentication</small></div></div></div></div></aside>
+ <main className="main-area"><header className="topbar"><div><div className="eyebrow">HEALTHTREND AI <span>/</span> {pageRows.toUpperCase()}</div><h1>{pageRows==='Overview'?'Disease intelligence overview':pageRows}</h1></div><div className="top-actions"><span className={'live-pill '+(realtime==='live'?'':'pending')}><i/>{realtime==='live'?'LIVE SYNC':realtime.toUpperCase()}</span><span className="sync-time"><Clock3 size={14}/>{lastSync?'Synced '+lastSync:'Sync pending'}</span><button className="icon-button" onClick={()=>void refresh()} disabled={loading} title="Refresh data"><RefreshCw size={16} className={loading?'spin':''}/></button><label className="demo-role-select">Role view<select value={role} onChange={e=>setRole(e.target.value as Role)}><option value="admin">Admin</option><option value="data_analyst">Data Analyst</option><option value="researcher">Researcher</option><option value="viewer">Viewer</option></select></label></div></header>
  {error&&<div className="inline-alert"><AlertTriangle size={16}/>{error}<button onClick={()=>setError('')}>Dismiss</button></div>}
  {pageRows==='Overview'&&<><section className="hero-banner"><div className="hero-orb"/><div className="hero-content"><div className="hero-tag"><Sparkles size={13}/> RESEARCH • DISCOVER • FORECAST</div><h2>Turn public health data<br/><em>into meaningful signals.</em></h2><p>Explore disease patterns, discover anomalies and compare forecasting methods using traceable public datasets.</p><div className="hero-meta"><span><Database size={14}/>{cases.length} verified observations</span><span><Fingerprint size={14}/>{ROLE_LABEL[role]} access</span></div></div><div className="hero-art"><div className="orbit orbit-a"/><div className="orbit orbit-b"/><div className="hero-center"><HeartPulse size={36}/></div><div className="orbit-dot dot-a"/><div className="orbit-dot dot-b"/><div className="orbit-dot dot-c"/></div></section>
  <section className="metric-grid"><Metric icon={<Activity/>} label="DISEASE OBSERVATIONS" value={fmt(cases.length)} foot="Rows in verified warehouse" tone="teal"/><Metric icon={<Database/>} label="AGGREGATE CASE COUNT" value={fmt(totalCases)} foot="Across loaded observations" tone="blue"/><Metric icon={<HeartPulse/>} label="HOSPITAL ADMISSIONS" value={admissions.length?fmt(admissionsTotal):'—'} foot={admissions.length?'HMIS validated records':'No validated HMIS data yet'} tone="violet"/><Metric icon={<BrainCircuit/>} label="COMPLETED MODEL RUNS" value={fmt(runs.filter(r=>r.status==='completed').length)} foot="Actual holdout evaluations" tone="amber"/></section>
@@ -171,7 +101,6 @@ export default function App(){
  {pageRows==='Forecasting'&&<><PageIntro title="Forecasting workspace" text="Inspect forecasts stored from rolling-origin model evaluation. Predictions are not clinical recommendations."/><Panel><SectionHead kicker="FORECAST OUTPUT" title="Predicted versus actual" subtitle="Only actual persisted forecast records are plotted"/>{forecasts.length?<div className="chart-wrap tall"><ResponsiveContainer width="100%" height="100%"><ReLineChart data={forecasts}><CartesianGrid stroke="#23394b" strokeDasharray="4 6"/><XAxis dataKey="forecast_date" tick={{fill:'#8ca2b4',fontSize:10}}/><YAxis tick={{fill:'#8ca2b4',fontSize:10}}/><Tooltip contentStyle={{background:'#101f30',border:'1px solid #29465a',borderRadius:12}}/><Legend/><Line type="monotone" dataKey="actual_value" name="Actual" stroke="#f2bd70" connectNulls dot={false}/><Line type="monotone" dataKey="predicted_value" name="Predicted" stroke="#4ce0c8" dot={false}/></ReLineChart></ResponsiveContainer></div>:<Empty icon={<Waves/>} title="No forecast points saved" detail="Forecast outputs appear after a model run completes successfully."/>}</Panel></>}
  {pageRows==='Model Comparison'&&<><PageIntro title="Model Comparison" text="Compare models using the same chronological holdout. MAE, RMSE and MAPE are computed from the same test observations."/><ModelTable runs={runs}/></>}
  {pageRows==='Data Sources'&&<><PageIntro title="Data Sources & Provenance" text="Open, public-health sources only. Refresh schedules follow the publisher's actual release cadence; this application does not invent live hospital feeds."/><div className="source-cards">{sources.map(s=><Panel key={s.id}><div className="source-card-head"><div className="source-icon"><Database size={17}/></div><span className={s.is_active?'quality-pill':'status-chip failed'}>{s.is_active?'Active':'Inactive'}</span></div><h3>{s.source_name}</h3><p>{s.publisher}</p><div className="source-meta"><span>Geography</span><b>{s.geography??'Not specified'}</b></div><div className="source-meta"><span>Refresh</span><b>{s.refresh_frequency??'Not specified'}</b></div><div className="source-meta"><span>Last loaded</span><b>{s.last_loaded_at?new Date(s.last_loaded_at).toLocaleString():'Not loaded'}</b></div><a className="source-link" href={s.source_url} target="_blank" rel="noreferrer">Open publisher source <ArrowUpRight size={14}/></a></Panel>)}</div>{!sources.length&&<Empty icon={<Database/>} title="No sources registered" detail="The ETL pipeline registers the exact source URL and report period when data is ingested."/>}</>}
- {pageRows==='User Access'&&<><PageIntro title="User access management" text="Assign least-privilege roles to verified accounts. New users are viewers until an administrator promotes them."/><Panel><SectionHead kicker="IDENTITY & ACCESS" title="Verified application accounts" subtitle="Roles are enforced in PostgreSQL row-level security"/><div className="table-scroll"><table><thead><tr><th>USER</th><th>EMAIL</th><th>CURRENT ROLE</th><th>ASSIGN ROLE</th><th>ACTION</th></tr></thead><tbody>{roleRows.map(r=><tr key={r.user_id}><td>{r.display_name||'—'}</td><td>{r.email}</td><td><span className="quality-pill">{ROLE_LABEL[r.role as Role]}</span></td><td><select value={r.role} onChange={e=>setRoleRows(old=>old.map(x=>x.user_id===r.user_id?{...x,role:e.target.value}:x))}><option value="viewer">Viewer</option><option value="researcher">Researcher</option><option value="data_analyst">Data Analyst</option><option value="admin">Administrator</option></select></td><td><button className="small-action" disabled={roleBusy===r.user_id||r.user_id===user?.id} onClick={()=>void changeRole(r.user_id,r.role as Role)}>{roleBusy===r.user_id?'Saving…':'Save role'}</button></td></tr>)}</tbody></table></div><p className="role-warning"><ShieldCheck size={15}/> Role changes are audited through the administrator workflow. Your own account cannot change its own role here.</p></Panel></>}
  <footer className="app-footer">HEALTHTREND AI <span>•</span> AGGREGATE RESEARCH INTELLIGENCE <span>•</span> NOT FOR CLINICAL DECISION-MAKING</footer></main></div>;
 }
 
